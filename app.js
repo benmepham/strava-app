@@ -12,7 +12,8 @@ const api = require("./routes/api");
 const app = express();
 dotenv.config();
 const environment = app.get("env");
-if (environment == "development") const logger = require("morgan");
+var logger
+if (environment == "development") logger = require("morgan");
 
 let collection;
 const client = new MongoClient(process.env.DATABASE, {
