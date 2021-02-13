@@ -14,7 +14,6 @@ const app = express();
 dotenv.config();
 const environment = app.get("env");
 
-
 let collection;
 const client = new MongoClient(process.env.DATABASE, {
     useNewUrlParser: true,
@@ -27,7 +26,7 @@ client.connect((err) => {
         dbName = "stravadb_prod";
     }
     collection = client.db(dbName).collection("users");
-    console.log("DB Connected");
+    //console.log("DB Connected");
     // perform actions on the collection object
     // client.close();
     global.collection = collection;
@@ -40,14 +39,19 @@ app.set("view engine", "pug");
 app.use(helmet());
 app.use(
     helmet.contentSecurityPolicy({
-      directives: {
-        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-        "script-src": ["'self'", "cdn.jsdelivr.net", "stackpath.bootstrapcdn.com", "code.jquery.com"],
-        "style-src": ["'self'", "stackpath.bootstrapcdn.com"],
-      },
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "script-src": [
+                "'self'",
+                "cdn.jsdelivr.net",
+                "stackpath.bootstrapcdn.com",
+                "code.jquery.com",
+            ],
+            "style-src": ["'self'", "stackpath.bootstrapcdn.com"],
+        },
     })
-  );
-app.use(logger("dev"));
+);
+if (environment == "development") app.use(logger("dev"));
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
@@ -83,7 +87,6 @@ passport.deserializeUser(function (obj, done) {
         done(null, doc);
     });
 });
-
 
 passport.use(
     new StravaStrategy(
