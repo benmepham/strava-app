@@ -1,17 +1,18 @@
-var createError = require("http-errors");
-var express = require("express");
-var path = require("path");
-var logger = require("morgan");
-var passport = require("passport");
-var StravaStrategy = require("passport-strava-oauth2").Strategy;
+const createError = require("http-errors");
+const express = require("express");
+const helmet = require("helmet");
+const path = require("path");
+const logger = require("morgan");
+const passport = require("passport");
+const StravaStrategy = require("passport-strava-oauth2").Strategy;
 const dotenv = require("dotenv");
 const MongoClient = require("mongodb").MongoClient;
 const cookieSession = require("cookie-session");
 
+const api = require("./routes/api");
+const app = express();
 dotenv.config();
-var api = require("./routes/api");
-var app = express();
-var environment = app.get("env");
+const environment = app.get("env");
 
 let collection;
 const client = new MongoClient(process.env.DATABASE, {
@@ -35,6 +36,16 @@ client.connect((err) => {
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
+app.use(helmet());
+app.use(
+    helmet.contentSecurityPolicy({
+      directives: {
+        ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+        "script-src": ["'self'", "cdn.jsdelivr.net", "stackpath.bootstrapcdn.com", "code.jquery.com"],
+        "style-src": ["'self'", "stackpath.bootstrapcdn.com"],
+      },
+    })
+  );
 app.use(logger("dev"));
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
