@@ -14,6 +14,7 @@ const app = express();
 dotenv.config();
 const environment = app.get("env");
 
+
 let collection;
 const client = new MongoClient(process.env.DATABASE, {
     useNewUrlParser: true,
@@ -83,12 +84,13 @@ passport.deserializeUser(function (obj, done) {
     });
 });
 
+
 passport.use(
     new StravaStrategy(
         {
             clientID: process.env.STRAVA_CLIENT_ID,
             clientSecret: process.env.STRAVA_CLIENT_SECRET,
-            callbackURL: "http://127.0.0.1:3000/auth/strava/callback",
+            callbackURL: process.env.CALLBACK,
         },
         function (accessToken, refreshToken, params, profile, done) {
             // asynchronous verification, for effect...
