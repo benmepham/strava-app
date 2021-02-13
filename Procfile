@@ -1,0 +1,1 @@
+strava-app: npm run start
