@@ -2,7 +2,6 @@ const createError = require("http-errors");
 const express = require("express");
 const helmet = require("helmet");
 const path = require("path");
-const logger = require("morgan");
 const passport = require("passport");
 const StravaStrategy = require("passport-strava-oauth2").Strategy;
 const dotenv = require("dotenv");
@@ -13,6 +12,7 @@ const api = require("./routes/api");
 const app = express();
 dotenv.config();
 const environment = app.get("env");
+if (environment == "development") const logger = require("morgan");
 
 let collection;
 const client = new MongoClient(process.env.DATABASE, {
