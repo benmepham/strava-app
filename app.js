@@ -160,7 +160,7 @@ app.get(
     passport.authenticate("strava", {
         // scope: ["activity:read_all,activity:read"],
         scope: ["activity:read"],
-        approvalPrompt: "auto",
+        // approvalPrompt: "auto",
     })
 );
 
