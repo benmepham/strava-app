@@ -97,7 +97,7 @@ passport.use(
         {
             clientID: process.env.STRAVA_CLIENT_ID,
             clientSecret: process.env.STRAVA_CLIENT_SECRET,
-            callbackURL: process.env.CALLBACK,
+            callbackURL: process.env.CALLBACKURL,
         },
         function (accessToken, refreshToken, params, profile, done) {
             // asynchronous verification, for effect...
