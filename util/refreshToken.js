@@ -41,9 +41,10 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
                 (err, doc) => {
                     if (err) return console.error(err);
                     console.log(doc.value);
-                    return doc.value.access_token;
+                    //return doc.value.access_token;
                 }
             );
+            return data.access_token;
         }
     } else {
         console.log("is fine");

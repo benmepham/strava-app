@@ -1,1 +1,1 @@
-strava-app: npm run start
+web: npm run prodstart

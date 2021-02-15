@@ -1,7 +1,6 @@
 const fetch = require("node-fetch");
 var refreshToken = require("../util/refreshToken");
 
-
 async function getActivity(token, page) {
     let resp = await fetch(
         "https://www.strava.com/api/v3/athlete/activities?page=" +
@@ -23,6 +22,8 @@ async function getActivity(token, page) {
 }
 
 async function getRuns(token, page, num) {
+    console.log("TOK gr: " + token);
+
     let pageIter = page;
     let runs = [];
     // console.log("page: ", page, "num: ", num);
@@ -41,6 +42,7 @@ async function getRuns(token, page, num) {
 }
 
 async function getActivityData(rid, token) {
+    console.log("TOK gad: " + token);
     let resp = await fetch("https://www.strava.com/api/v3/activities/" + rid, {
         headers: { Authorization: "Bearer " + token },
     });
@@ -53,24 +55,35 @@ async function getActivityData(rid, token) {
 }
 
 exports.view = async function (req, res) {
-    const access_token = await refreshToken.refreshToken(req.user.id, req.user.access_token, req.user.refresh_token, req.user.expires_at);
-    let runs = await getRuns(access_token, req.query.page, req.query.num);
+    let returned_access_token = await refreshToken.refreshToken(
+        req.user.id,
+        req.user.access_token,
+        req.user.refresh_token,
+        req.user.expires_at
+    );
+    
+    console.log(returned_access_token);
+    let runs = await getRuns(
+        returned_access_token,
+        req.query.page,
+        req.query.num
+    );
     let runArray = [];
     let time, run, date, seconds;
 
     for (let x of runs.runs) {
         // console.log(x.id);
-        run = await getActivityData(x.id, access_token);
+        run = await getActivityData(x.id, returned_access_token);
         // console.log(run.name);
         // console.log(run.start_date);
         // console.log(run.best_efforts[5]);
         date = run.start_date.slice(0, 10);
         seconds = (run.best_efforts[5].moving_time % 60).toString();
-        if (seconds.length == 1)
-            seconds = "0" + seconds;
+        if (seconds.length == 1) seconds = "0" + seconds;
         time =
             Math.floor(run.best_efforts[5].moving_time / 60).toString() +
-            ":" + seconds;
+            ":" +
+            seconds;
         runArray.push({
             name: run.name,
             date: date,

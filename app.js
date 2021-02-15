@@ -7,12 +7,15 @@ const StravaStrategy = require("passport-strava-oauth2").Strategy;
 const dotenv = require("dotenv");
 const MongoClient = require("mongodb").MongoClient;
 const cookieSession = require("cookie-session");
+const debug = require("debug")("strava-app:appjs");
 
 const api = require("./routes/api");
 const app = express();
 dotenv.config();
 const environment = app.get("env");
-var logger
+debug("NODE_ENV: " + environment);
+
+var logger;
 if (environment == "development") logger = require("morgan");
 
 let collection;
@@ -27,7 +30,7 @@ client.connect((err) => {
         dbName = "stravadb_prod";
     }
     collection = client.db(dbName).collection("users");
-    //console.log("DB Connected");
+    debug("DB Connected");
     // perform actions on the collection object
     // client.close();
     global.collection = collection;
@@ -140,7 +143,6 @@ passport.use(
 app.get("/api/activities", ensureAuthenticated, api.view);
 
 app.get("/", function (req, res) {
-    console.log("NODE_ENV: " + environment);
     res.render("index", {});
 });
 

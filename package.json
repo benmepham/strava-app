@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
+    "prodstart": "node ./bin/www",
     "devstart": "nodemon ./bin/www",
     "debugstart": "DEBUG=strava-app:* npm run devstart"
   },
