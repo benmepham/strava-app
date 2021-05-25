@@ -12,12 +12,12 @@ async function getActivity(token, page) {
     );
 
     if (!resp.ok) {
-        return console.error(resp.status);
+        console.error("getActivity Error:", resp.status);
+        return { status: resp.status };
     } else {
+        console.log(resp.status);
         const data = await resp.json();
-        // console.log("single");
-        // console.log(data);
-        return data;
+        return { data: data, status: resp.status };
     }
 }
 
@@ -30,7 +30,13 @@ async function getRuns(token, page, num) {
 
     while (runs.length != num) {
         // console.log(runs.length, "length");
-        const run = await getActivity(token, pageIter);
+        const getActivity_return = await getActivity(token, pageIter);
+        if (getActivity_return.status != 200)
+            return {
+                error: true,
+                status: getActivity_return.status,
+            };
+        let run = getActivity_return.data;
         // console.log("Fetched run");
         if (run[0].type == "Run" && run[0].distance >= 5000) {
             // console.log("isRun");
@@ -47,10 +53,12 @@ async function getActivityData(rid, token) {
         headers: { Authorization: "Bearer " + token },
     });
     if (!resp.ok) {
-        return console.error(resp.status);
+        console.error("getActivityData Error:", resp.status);
+        return { status: resp.status };
     } else {
+        console.log(resp.status);
         const data = await resp.json();
-        return data;
+        return { data: data, status: resp.status };
     }
 }
 
@@ -61,19 +69,25 @@ exports.view = async function (req, res) {
         req.user.refresh_token,
         req.user.expires_at
     );
-    
+
     console.log(returned_access_token);
     let runs = await getRuns(
         returned_access_token,
         req.query.page,
         req.query.num
     );
+
+    if (runs.error) {
+        return res.send({ error: true, status: runs.status });
+    }
     let runArray = [];
     let time, run, date, seconds;
 
     for (let x of runs.runs) {
         // console.log(x.id);
         run = await getActivityData(x.id, returned_access_token);
+        run = run.data;
+
         // console.log(run.name);
         // console.log(run.start_date);
         // console.log(run.best_efforts[5]);

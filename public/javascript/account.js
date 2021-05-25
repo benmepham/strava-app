@@ -32,7 +32,14 @@ $(document).ready(function () {
             $(".loader").removeClass("invisible");
         },
         success: function (data) {
-            addToTable(data);
+            if (data.error) {
+                if (data.status == 401) {
+                    $(".modal-body").text(
+                        "The API received a 401 Unauthorised error. Perhaps you did not allow the app to access your activity data?"
+                    );
+                }
+                $("#errorModal").modal("show");
+            } else addToTable(data);
         },
         complete: function () {
             $(".loader").addClass("invisible");
