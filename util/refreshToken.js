@@ -8,7 +8,8 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
     let currentTime = Math.floor(+new Date() / 1000);
     //currentTime = 100;
     console.log("current, expires:", currentTime, expires_at);
-    if (expires_at < currentTime + 30) { // add 30 secs in case close to expiry time
+    if (expires_at < currentTime + 30) {
+        // add 30 secs in case close to expiry time
         console.log("needs refreshing");
         let resp = await fetch(
             "https://www.strava.com/api/v3/oauth/token?" +
@@ -27,9 +28,8 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
         } else {
             const data = await resp.json();
             console.log(data);
-            collection.findAndModify(
+            collection.findOneAndUpdate(
                 { id: id },
-                {},
                 {
                     $set: {
                         access_token: data.access_token,
@@ -37,11 +37,10 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
                         expires_at: data.expires_at,
                     },
                 },
-                { upsert: true, new: true },
+                { upsert: true, returnDocument: "after" },
                 (err, doc) => {
                     if (err) return console.error(err);
                     console.log(doc.value);
-                    //return doc.value.access_token;
                 }
             );
             return data.access_token;
