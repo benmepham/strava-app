@@ -106,18 +106,19 @@ passport.use(
                 // represent the logged-in user.  In a typical application, you would want
                 // to associate the Strava account with a user record in your database,
                 // and return that user instead.
+
                 // console.log(profile);
                 // console.log("Exp", params.expires_in, params.expires_at);
                 // console.log("TOKENs:", accessToken, refreshToken);
-                collection.findAndModify(
+
+                collection.findOneAndUpdate(
                     { id: profile.id },
-                    {},
                     {
                         $setOnInsert: {
                             id: profile.id,
                             name: profile.displayName,
                             photo: profile.photos[0].value,
-                            emails: profile.emails || "none",
+                            email: profile.emails[0].value || "none",
                             created_on: new Date(),
                         },
                         $set: {
@@ -128,7 +129,7 @@ passport.use(
                         },
                         $inc: { login_count: 1 },
                     },
-                    { upsert: true, new: true },
+                    { upsert: true, returnDocument: "after" },
                     (err, doc) => {
                         if (err) return console.error(err);
                         //console.log(doc.value);
