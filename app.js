@@ -144,7 +144,7 @@ passport.use(
 app.get("/api/activities", ensureAuthenticated, api.view);
 
 app.get("/", function (req, res) {
-    res.render("index", {});
+    res.render("index", { user: req.user });
 });
 
 app.get("/account", ensureAuthenticated, function (req, res) {
