@@ -8,17 +8,24 @@ block content
     #navbarsExampleDefault.collapse.navbar-collapse
       ul.navbar-nav.mr-auto
         li.nav-item.active
-          a.nav-link(href='#') Home 
-        li.nav-item
-          a.nav-link(href='/account') Account
+          a.nav-link(href='#') Home
+        if user
+          li.nav-item
+            a.nav-link(href='/account') Account
+          li.nav-item
+            a.nav-link(href='/logout') Logout
   main(role='main')
     .jumbotron
       .container
         h1.display-3 Strava App (Beta)
         h4 Sign in with your strava account to get your 5K run times.
-        a(href="/auth/strava")
-          img(alt="Connect with Strava" src="/images/btn_strava.png")
+        if user
+          a(href="/account")
+            button.btn.btn-primary(type='button') Account
+        else
+          a(href="/auth/strava")
+            img(alt="Connect with Strava" src="/images/btn_strava.png")
   footer.container
-    p © BJM - 
+    p © BJM -
       a(href="https://github.com/benmepham/strava-app") GitHub
 

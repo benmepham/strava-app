@@ -1,13 +1,3 @@
-//- extends layout
-
-//- block content
-//-   h1 Account
-//-   p= user.displayName
-//-   a(href="/api/activities") Activities
-//-   br
-//-   a(href="/logout") Logout
-
-
 extends layout
 
 block content
@@ -20,14 +10,16 @@ block content
     #navbarsExampleDefault.collapse.navbar-collapse
       ul.navbar-nav.mr-auto
         li.nav-item
-          a.nav-link(href='/') Home 
+          a.nav-link(href='/') Home
         li.nav-item.active
           a.nav-link(href='/account') Account
         li.nav-item
           a.nav-link(href='/logout') Logout
   main(role='main')
     .container.maincontainer
-      h1 Activities
+      h1= "Hello " + user.name
+      br
+      h2 Activities
       table.table
         thead
           tr
@@ -39,8 +31,8 @@ block content
         a.btn.btn-primary.btn-lg(id="get") More
 
   footer.container
-    p © BJM - 
-      a(href="https://github.com/benmepham") GitHub
+    p BJM -
+      a(href="https://github.com/benmepham")  GitHub
 
   script(src='/javascript/account.js')
 
