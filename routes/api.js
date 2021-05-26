@@ -15,14 +15,13 @@ async function getActivity(token, page) {
         console.error("getActivity Error:", resp.status);
         return { status: resp.status };
     } else {
-        console.log(resp.status);
         const data = await resp.json();
         return { data: data, status: resp.status };
     }
 }
 
 async function getRuns(token, page, num) {
-    console.log("TOK gr: " + token);
+    // console.log("TOK gr: " + token);
 
     let pageIter = page;
     let runs = [];
@@ -48,7 +47,7 @@ async function getRuns(token, page, num) {
 }
 
 async function getActivityData(rid, token) {
-    console.log("TOK gad: " + token);
+    // console.log("TOK gad: " + token);
     let resp = await fetch("https://www.strava.com/api/v3/activities/" + rid, {
         headers: { Authorization: "Bearer " + token },
     });
@@ -56,7 +55,6 @@ async function getActivityData(rid, token) {
         console.error("getActivityData Error:", resp.status);
         return { status: resp.status };
     } else {
-        console.log(resp.status);
         const data = await resp.json();
         return { data: data, status: resp.status };
     }
@@ -70,7 +68,7 @@ exports.view = async function (req, res) {
         req.user.expires_at
     );
 
-    console.log(returned_access_token);
+    // console.log(returned_access_token);
     let runs = await getRuns(
         returned_access_token,
         req.query.page,

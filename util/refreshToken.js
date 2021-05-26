@@ -27,7 +27,7 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
             return console.error(resp.status);
         } else {
             const data = await resp.json();
-            console.log(data);
+            // console.log(data);
             collection.findOneAndUpdate(
                 { id: id },
                 {
@@ -40,13 +40,13 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
                 { upsert: true, returnDocument: "after" },
                 (err, doc) => {
                     if (err) return console.error(err);
-                    console.log(doc.value);
+                    // console.log(doc.value);
                 }
             );
             return data.access_token;
         }
     } else {
-        console.log("is fine");
+        // console.log("is fine");
         return access_token;
     }
 }

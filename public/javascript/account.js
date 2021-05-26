@@ -1,9 +1,9 @@
 $(document).ready(function () {
     function addToTable(data) {
-        console.log(data);
+        // console.log(data);
         let rows;
         for (let i = 0; i < data.runs.length; i++) {
-            console.log(data.runs[i]);
+            // console.log(data.runs[i]);
             const run = data.runs[i];
             rows +=
                 "<tr>" +
