@@ -47,9 +47,8 @@ async function getRuns(token, page, num) {
     return { runs: runs, page: pageIter };
 }
 
-async function getActivityData(rid, token) {
-    // console.log("TOK gad: " + token);
-    let resp = await fetch("https://www.strava.com/api/v3/activities/" + rid, {
+async function getActivityData(activityId, token) {
+    let resp = await fetch("https://www.strava.com/api/v3/activities/" + activityId, {
         headers: { Authorization: "Bearer " + token },
     });
     if (!resp.ok) {

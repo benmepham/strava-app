@@ -3,7 +3,7 @@ const debug = require("debug")("strava-app:db");
 
 let collection;
 
-module.exports = {loadDb}
+module.exports = { loadDb, findUser };
 
 function loadDb(environment) {
     const client = new MongoClient(process.env.DATABASE, {
@@ -22,4 +22,19 @@ function loadDb(environment) {
         // client.close();
         global.collection = collection;
     });
+}
+
+async function findUser(id) {
+    // await collection.findOne({ id: id }, async (err, doc) => {
+    //     if (err) return console.error(err);
+    //     return await doc;
+    // });
+
+    try {
+        res = await collection.findOne({ id: id });
+        console.log(res);
+        return res;
+    } catch (err) {
+        console.log(err);
+    }
 }
