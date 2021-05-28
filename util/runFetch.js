@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-module.exports = {getActivity, getRuns, getActivityData}
+module.exports = { getActivity, getRuns, getActivityData, parseRun };
 
 async function getActivity(token, page) {
     let resp = await fetch(
@@ -48,9 +48,12 @@ async function getRuns(token, page, num) {
 }
 
 async function getActivityData(activityId, token) {
-    let resp = await fetch("https://www.strava.com/api/v3/activities/" + activityId, {
-        headers: { Authorization: "Bearer " + token },
-    });
+    let resp = await fetch(
+        "https://www.strava.com/api/v3/activities/" + activityId,
+        {
+            headers: { Authorization: "Bearer " + token },
+        }
+    );
     if (!resp.ok) {
         console.error("getActivityData Error:", resp.status);
         return { status: resp.status };
@@ -58,4 +61,21 @@ async function getActivityData(activityId, token) {
         const data = await resp.json();
         return { data: data, status: resp.status };
     }
+}
+
+function parseRun(run) {
+    let date = run.start_date.slice(0, 10);
+    let seconds = (run.best_efforts[5].moving_time % 60).toString();
+    if (seconds.length == 1) seconds = "0" + seconds;
+    let time =
+        Math.floor(run.best_efforts[5].moving_time / 60).toString() +
+        ":" +
+        seconds;
+
+    return {
+        name: run.name,
+        date: date,
+        time: time,
+        id: run.id,
+    };
 }

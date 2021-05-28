@@ -6,22 +6,32 @@ exports.main = async function (req, res) {
     console.log("webhook event received!", req.query, req.body);
     res.status(200).send("EVENT_RECEIVED");
 
+    if (req.query['aspect-type'] == "create") {
+        const user = await db.findUser(parseInt(req.query.owner_id));
 
-    const user = await db.findUser(parseInt(req.query.owner_id));
+        // refresh token Checks
+        console.log(user);
+        let returned_access_token = await refreshToken.refreshToken(
+            user.id,
+            user.access_token,
+            user.refresh_token,
+            user.expires_at
+        );
 
+        //get run data
+        run = await runFetch.getActivityData(
+            req.query.object_id,
+            returned_access_token
+        );
+        run = run.data;
 
-    // refresh token Checks
-    await console.log(user);
-    let returned_access_token = await refreshToken.refreshToken(
-        user.id,
-        user.access_token,
-        user.refresh_token,
-        user.expires_at
-    );
+        if (run.type != "Run" || run.distance <= 5000) {
+            return console.log("not 5k run");
+        }
+        const runData = runFetch.parseRun(run);
 
-    //get run data
-    run = await runFetch.getActivityData(req.query.object_id, returned_access_token);
-    console.log(run);
+        console.log(runData);
 
-    // send email
+        // send email
+    }
 };
