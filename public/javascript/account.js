@@ -51,10 +51,32 @@ $(document).ready(function () {
         });
     }
 
+    $("#email_submit").click(function () {
+        const email = $("#exampleInputEmail1").val();
+        const mailformat =
+            /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+        // Email validation regex from: https://tutorial.eyehunts.com/js/email-regex-javascript-validation-example-code/
 
-    $("#email_submit").click(function() {
-        console.log($("#exampleInputEmail1").val());
-    })
+        if (!email.match(mailformat)) {
+            alert("Invalid email address!");
+        } else {
+            console.log(email);
+            // write email address to DB, and redirect to account
+            $.ajax({
+                url: "/api/email?email="+email,
+                type: "post",
+                data: { email: email },
+                success: function (response) {
+                    console.log(response);
+                },
+            });
+
+            // $.post("/api/email", { email_add: email }, function (data, status) {
+            //     console.log(data, status);
+            // });
+            // window.location.replace("/account");
+        }
+    });
 
     $("#get").click(function () {
         const page = $("table").data("page");

@@ -9,6 +9,8 @@ const cookieSession = require("cookie-session");
 const debug = require("debug")("strava-app:appjs");
 
 const api = require("./routes/api");
+const email_api = require("./routes/email_api");
+
 const webhook = require("./routes/webhook");
 const db = require("./util/db");
 
@@ -121,6 +123,8 @@ passport.use(
 );
 
 app.get("/api/activities", ensureAuthenticated, api.view);
+
+app.post("/api/email", email_api.email_db);
 
 app.get("/", function (req, res) {
     res.render("index", { user: req.user });
