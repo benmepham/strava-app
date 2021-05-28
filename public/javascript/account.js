@@ -50,6 +50,17 @@ function getRun(page) {
     });
 }
 
+function validateEmail(email) {
+    const mailformat =
+        /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+    // Email validation regex from: https://tutorial.eyehunts.com/js/email-regex-javascript-validation-example-code/
+    if (!email.match(mailformat)) {
+        alert("Invalid email address!");
+        return false;
+    }
+    return true;
+}
+
 $(document).ready(function () {
     $("table").data("page", 1);
     const queryParamsString = window.location.search.substr(1);
@@ -61,16 +72,10 @@ $(document).ready(function () {
 
     $("#email_submit").click(function () {
         const email = $("#exampleInputEmail1").val();
-        const mailformat =
-            /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-        // Email validation regex from: https://tutorial.eyehunts.com/js/email-regex-javascript-validation-example-code/
-        if (!email.match(mailformat)) {
-            alert("Invalid email address!");
-        } else {
+        if (validateEmail(email)) {
             $.ajax({
                 url: "/api/email?email=" + email,
                 type: "post",
-                data: { email: email },
                 success: function () {
                     window.location.replace("/account");
                 },
@@ -85,5 +90,24 @@ $(document).ready(function () {
     $("#get").click(function () {
         const page = $("table").data("page");
         getRun(page);
+    });
+
+    $("#updateSettings").click(function () {
+        const email = $("#email").val();
+        const checkedEmail = $("#emailChecked").is(":checked");
+        console.log(checkedEmail);
+        if (validateEmail(email)) {
+            $.ajax({
+                url: "/api/email?email=" + email + "&enabled=" + checkedEmail,
+                type: "post",
+                success: function () {
+                    alert("Updated successfully");
+                },
+                error: function (xhr, status, error) {
+                    var errorMessage = xhr.status + ": " + xhr.statusText;
+                    alert("Error - " + errorMessage);
+                },
+            });
+        }
     });
 });

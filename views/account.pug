@@ -38,7 +38,7 @@ block content
           input#email.form-control(type='email' value=user.email name='email')
         .checkbox
           label
-            input(type='checkbox' name='remember' checked=user.sendEmails)
+            input#emailChecked(type='checkbox' checked=(user.sendEmails == "true" ? true : false))
             |  Enable emails
         a.btn.btn-primary(id="updateSettings") Update
   footer.container
