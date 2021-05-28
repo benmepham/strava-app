@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const path = require("path");
 const passport = require("passport");
 const StravaStrategy = require("passport-strava-oauth2").Strategy;
-const dotenv = require("dotenv");
+// const dotenv = require("dotenv");
 const cookieSession = require("cookie-session");
 const debug = require("debug")("strava-app:appjs");
 
@@ -13,7 +13,7 @@ const webhook = require("./routes/webhook");
 const db = require("./util/db");
 
 const app = express();
-dotenv.config();
+// dotenv.config();
 const environment = app.get("env");
 // debug("NODE_ENV: " + environment);
 

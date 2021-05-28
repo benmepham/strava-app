@@ -1,12 +1,13 @@
 var db = require("../util/db");
 var refreshToken = require("../util/refreshToken");
 var runFetch = require("../util/runFetch");
+var email = require("../util/email");
 
 exports.main = async function (req, res) {
     console.log("webhook event received!", req.query, req.body);
     res.status(200).send("EVENT_RECEIVED");
 
-    if (req.query['aspect-type'] == "create") {
+    if (req.query["aspect-type"] == "create") {
         const user = await db.findUser(parseInt(req.query.owner_id));
 
         // refresh token Checks
@@ -32,6 +33,26 @@ exports.main = async function (req, res) {
 
         console.log(runData);
 
+        let emailText =
+            "Hello " +
+            user.name +
+            "\n" +
+            "You have completed a run, " +
+            runData.name +
+            " on " +
+            runData.date +
+            " at " +
+            runData.time +
+            "\nYour time is " +
+            runData.time;
+        let emailHtml;
+
         // send email
+        email.sendMail(
+            "ben@bjm.me.uk",
+            runData.name + " Time",
+            emailText,
+            null
+        );
     }
 };
