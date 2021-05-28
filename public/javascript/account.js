@@ -28,27 +28,31 @@ $(document).ready(function () {
     if (queryParamsString == "new=true") {
         $("#emailModal").modal("show");
     } else {
-        // $.ajax({
-        //     type: "GET",
-        //     url: "/api/activities?page=1&num=1",
-        //     dataType: "json",
-        //     beforeSend: function () {
-        //         $(".loader").removeClass("invisible");
-        //     },
-        //     success: function (data) {
-        //         if (data.error) {
-        //             if (data.status == 401) {
-        //                 $(".modal-body").text(
-        //                     "The API received a 401 Unauthorised error. Perhaps you did not allow the app to access your activity data?"
-        //                 );
-        //             }
-        //             $("#errorModal").modal("show");
-        //         } else addToTable(data);
-        //     },
-        //     complete: function () {
-        //         $(".loader").addClass("invisible");
-        //     },
-        // });
+        $.ajax({
+            type: "GET",
+            url: "/api/activities?page=1&num=1",
+            dataType: "json",
+            beforeSend: function () {
+                $(".loader").removeClass("invisible");
+            },
+            success: function (data) {
+                addToTable(data);
+            },
+            complete: function () {
+                $(".loader").addClass("invisible");
+            },
+            error: function (xhr, status, error) {
+                if (xhr.status == 401) {
+                    $(".modal-body").text(
+                        "The API received a 401 Unauthorised error. Perhaps you did not allow the app to access your activity data?"
+                    );
+                    $("#errorModal").modal("show");
+                } else {
+                    var errorMessage = xhr.status + ": " + xhr.statusText;
+                    alert("Error - " + errorMessage);
+                }
+            },
+        });
     }
 
     $("#email_submit").click(function () {
