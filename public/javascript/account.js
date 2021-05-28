@@ -1,9 +1,7 @@
 $(document).ready(function () {
     function addToTable(data) {
-        // console.log(data);
         let rows;
         for (let i = 0; i < data.runs.length; i++) {
-            // console.log(data.runs[i]);
             const run = data.runs[i];
             rows +=
                 "<tr>" +
@@ -24,27 +22,39 @@ $(document).ready(function () {
         $("table tbody").append(rows);
         $("table").data("page", data.page);
     }
-    $.ajax({
-        type: "GET",
-        url: "/api/activities?page=1&num=1",
-        dataType: "json",
-        beforeSend: function () {
-            $(".loader").removeClass("invisible");
-        },
-        success: function (data) {
-            if (data.error) {
-                if (data.status == 401) {
-                    $(".modal-body").text(
-                        "The API received a 401 Unauthorised error. Perhaps you did not allow the app to access your activity data?"
-                    );
-                }
-                $("#errorModal").modal("show");
-            } else addToTable(data);
-        },
-        complete: function () {
-            $(".loader").addClass("invisible");
-        },
-    });
+
+    const queryParamsString = window.location.search.substr(1);
+    console.log(queryParamsString);
+    if (queryParamsString == "new=true") {
+        $("#emailModal").modal("show");
+    } else {
+        $.ajax({
+            type: "GET",
+            url: "/api/activities?page=1&num=1",
+            dataType: "json",
+            beforeSend: function () {
+                $(".loader").removeClass("invisible");
+            },
+            success: function (data) {
+                if (data.error) {
+                    if (data.status == 401) {
+                        $(".modal-body").text(
+                            "The API received a 401 Unauthorised error. Perhaps you did not allow the app to access your activity data?"
+                        );
+                    }
+                    $("#errorModal").modal("show");
+                } else addToTable(data);
+            },
+            complete: function () {
+                $(".loader").addClass("invisible");
+            },
+        });
+    }
+
+
+    $("#email_submit").click(function() {
+        console.log($("#exampleInputEmail1").val());
+    })
 
     $("#get").click(function () {
         const page = $("table").data("page");

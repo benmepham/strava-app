@@ -48,6 +48,26 @@ block content
           button.btn.btn-secondary(type='button' data-dismiss='modal') Close
           a.btn.btn-primary(href="/auth/strava") Reconnect
 
+  if user.login_count<=1
+    #emailModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='emailModalLabel' aria-hidden='true')
+      .modal-dialog(role='document')
+        .modal-content
+          .modal-header
+            h5#emailModalLabel.modal-title Welcome to the 5K App
+            button.close(type='button' data-dismiss='modal' aria-label='Close')
+              span(aria-hidden='true') &times;
+          .modal-body
+            | If you would like to receive an email each time you complete a run, please enter your email address below:
+            br
+            br
+            form
+              .form-group
+                label(for='exampleInputEmail1') Email address
+                input#exampleInputEmail1.form-control(type='email' aria-describedby='emailHelp' placeholder='Enter email')
+                small#emailHelp.form-text.text-muted We&apos;ll never share your email with anyone else.
+          .modal-footer
+            button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+            button.btn.btn-primary(id="email_submit" type='button') Sign up to emails
 
   script(src='/javascript/account.js')
 

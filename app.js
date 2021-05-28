@@ -97,7 +97,7 @@ passport.use(
                             id: profile.id,
                             name: profile.displayName,
                             photo: profile.photos[0].value,
-                            email: profile.emails[0].value || "none",
+                            email: profile.emails[0].value,
                             created_on: new Date(),
                         },
                         $set: {
@@ -153,6 +153,9 @@ app.get(
     "/auth/strava/callback",
     passport.authenticate("strava", { failureRedirect: "/" }),
     function (req, res) {
+        if (req.user.login_count <= 1) {
+            return res.redirect("/account?new=true");
+        }
         res.redirect("/account");
     }
 );

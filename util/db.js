@@ -25,16 +25,10 @@ function loadDb(environment) {
 }
 
 async function findUser(id) {
-    // await collection.findOne({ id: id }, async (err, doc) => {
-    //     if (err) return console.error(err);
-    //     return await doc;
-    // });
-
     try {
         res = await collection.findOne({ id: id });
-        console.log(res);
         return res;
     } catch (err) {
-        console.log(err);
+        return console.log(err);
     }
 }
