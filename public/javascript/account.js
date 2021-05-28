@@ -63,18 +63,19 @@ $(document).ready(function () {
             console.log(email);
             // write email address to DB, and redirect to account
             $.ajax({
-                url: "/api/email?email="+email,
+                url: "/api/email?email=" + email,
                 type: "post",
                 data: { email: email },
                 success: function (response) {
                     console.log(response);
+                    window.location.replace("/account");
                 },
             });
 
             // $.post("/api/email", { email_add: email }, function (data, status) {
             //     console.log(data, status);
             // });
-            // window.location.replace("/account");
+            //
         }
     });
 
