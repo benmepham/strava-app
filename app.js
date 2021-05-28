@@ -101,6 +101,7 @@ passport.use(
                             photo: profile.photos[0].value,
                             email: profile.emails[0].value,
                             created_on: new Date(),
+                            sendEmails: false,
                         },
                         $set: {
                             last_login: new Date(),

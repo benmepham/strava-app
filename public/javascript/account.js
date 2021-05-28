@@ -66,8 +66,11 @@ $(document).ready(function () {
                 type: "post",
                 data: { email: email },
                 success: function (response) {
-                    console.log(response);
                     window.location.replace("/account");
+                },
+                error: function (xhr, status, error) {
+                    var errorMessage = xhr.status + ": " + xhr.statusText;
+                    alert("Error - " + errorMessage);
                 },
             });
         }
@@ -87,6 +90,10 @@ $(document).ready(function () {
             },
             complete: function () {
                 $(".loader").addClass("invisible");
+            },
+            error: function (xhr, status, error) {
+                var errorMessage = xhr.status + ": " + xhr.statusText;
+                alert("Error - " + errorMessage);
             },
         });
     });

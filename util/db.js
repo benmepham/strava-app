@@ -3,7 +3,7 @@ const debug = require("debug")("strava-app:db");
 
 let collection;
 
-module.exports = { loadDb, findUser, setEmail };
+module.exports = { loadDb, findUser, setEmail, setAlertOption };
 
 function loadDb(environment) {
     const client = new MongoClient(process.env.DATABASE, {
@@ -40,6 +40,23 @@ async function setEmail(id, email) {
             {
                 $set: {
                     email: email,
+                },
+            },
+            { upsert: false, returnDocument: "after" }
+        );
+        return res;
+    } catch (err) {
+        return console.log(err);
+    }
+}
+
+async function setAlertOption(id, bool) {
+    try {
+        res = await collection.findOneAndUpdate(
+            { id: id },
+            {
+                $set: {
+                    sendEmails: bool,
                 },
             },
             { upsert: false, returnDocument: "after" }

@@ -17,7 +17,8 @@ async function email_db(req, res) {
 
     //save to db
     const db_res = await db.setEmail(req.user.id, req.query.email);
-    if (db_res.ok == 1) {
+    const db_res2 = await db.setAlertOption(req.user.id, true);
+    if (db_res.ok == 1 && db_res2.ok  == 1) {
         res.status(200).send("ok");
     } else {
         res.status(500).send("db error");
