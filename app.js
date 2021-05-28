@@ -5,38 +5,23 @@ const path = require("path");
 const passport = require("passport");
 const StravaStrategy = require("passport-strava-oauth2").Strategy;
 const dotenv = require("dotenv");
-const MongoClient = require("mongodb").MongoClient;
 const cookieSession = require("cookie-session");
 const debug = require("debug")("strava-app:appjs");
 
 const api = require("./routes/api");
 const webhook = require("./routes/webhook");
+const db = require("./util/db");
 
 const app = express();
 dotenv.config();
 const environment = app.get("env");
-debug("NODE_ENV: " + environment);
+// debug("NODE_ENV: " + environment);
 
 var logger;
 if (environment == "development") logger = require("morgan");
+if (environment == "development") app.use(logger("dev"));
 
-let collection;
-const client = new MongoClient(process.env.DATABASE, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
-client.connect((err) => {
-    if (err) return console.error(err);
-    let dbName = "stravadb_dev";
-    if (environment == "production") {
-        dbName = "stravadb_prod";
-    }
-    collection = client.db(dbName).collection("users");
-    debug("DB Connected");
-    // perform actions on the collection object
-    // client.close();
-    global.collection = collection;
-});
+db.loadDb(environment);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -57,11 +42,10 @@ app.use(
         },
     })
 );
-if (environment == "development") app.use(logger("dev"));
+
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-
 app.use(
     cookieSession({
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
@@ -104,14 +88,7 @@ passport.use(
         function (accessToken, refreshToken, params, profile, done) {
             // asynchronous verification, for effect...
             process.nextTick(function () {
-                // To keep the example simple, the user's Strava profile is returned to
-                // represent the logged-in user.  In a typical application, you would want
-                // to associate the Strava account with a user record in your database,
-                // and return that user instead.
-
                 // console.log(profile);
-                // console.log("Exp", params.expires_in, params.expires_at);
-                // console.log("TOKENs:", accessToken, refreshToken);
 
                 collection.findOneAndUpdate(
                     { id: profile.id },
