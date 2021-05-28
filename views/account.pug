@@ -15,7 +15,7 @@ block content
           a.nav-link(href='/account') Account
         li.nav-item
           a.nav-link(href='/logout') Logout
-  main(role='main')
+  main(role='main').my-4
     .container.maincontainer
       h1= "Hello " + user.name
       br
@@ -28,8 +28,19 @@ block content
             th(scope='col') 5K Time
         tbody
       p
-        a.btn.btn-primary.btn-lg(id="get") More
+        a.btn.btn-primary(id="get") More
 
+    .container-sm.settings
+      h2 Settings
+      form
+        .form-group
+          label(for='email') Email:
+          input#email.form-control(type='email' value=user.email name='email')
+        .checkbox
+          label
+            input(type='checkbox' name='remember')
+            |  Enable emails
+        a.btn.btn-primary(id="updateSettings") Update
   footer.container
     p BJM -
       a(href="https://github.com/benmepham")  GitHub

@@ -28,27 +28,27 @@ $(document).ready(function () {
     if (queryParamsString == "new=true") {
         $("#emailModal").modal("show");
     } else {
-        $.ajax({
-            type: "GET",
-            url: "/api/activities?page=1&num=1",
-            dataType: "json",
-            beforeSend: function () {
-                $(".loader").removeClass("invisible");
-            },
-            success: function (data) {
-                if (data.error) {
-                    if (data.status == 401) {
-                        $(".modal-body").text(
-                            "The API received a 401 Unauthorised error. Perhaps you did not allow the app to access your activity data?"
-                        );
-                    }
-                    $("#errorModal").modal("show");
-                } else addToTable(data);
-            },
-            complete: function () {
-                $(".loader").addClass("invisible");
-            },
-        });
+        // $.ajax({
+        //     type: "GET",
+        //     url: "/api/activities?page=1&num=1",
+        //     dataType: "json",
+        //     beforeSend: function () {
+        //         $(".loader").removeClass("invisible");
+        //     },
+        //     success: function (data) {
+        //         if (data.error) {
+        //             if (data.status == 401) {
+        //                 $(".modal-body").text(
+        //                     "The API received a 401 Unauthorised error. Perhaps you did not allow the app to access your activity data?"
+        //                 );
+        //             }
+        //             $("#errorModal").modal("show");
+        //         } else addToTable(data);
+        //     },
+        //     complete: function () {
+        //         $(".loader").addClass("invisible");
+        //     },
+        // });
     }
 
     $("#email_submit").click(function () {
@@ -61,7 +61,6 @@ $(document).ready(function () {
             alert("Invalid email address!");
         } else {
             console.log(email);
-            // write email address to DB, and redirect to account
             $.ajax({
                 url: "/api/email?email=" + email,
                 type: "post",
@@ -71,11 +70,6 @@ $(document).ready(function () {
                     window.location.replace("/account");
                 },
             });
-
-            // $.post("/api/email", { email_add: email }, function (data, status) {
-            //     console.log(data, status);
-            // });
-            //
         }
     });
 
