@@ -14,7 +14,7 @@ exports.view = async function (req, res) {
         req.query.num
     );
     if (runs.error) {
-        return res.status(runs.status).send({ error: true, status: runs.status });
+        return res.status(runs.status).send();
     }
     let runArray = [];
     for (let run of runs.runs) {
