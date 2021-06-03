@@ -56,7 +56,7 @@ async function setAlertOption(id, bool) {
             { id: id },
             {
                 $set: {
-                    sendEmails: bool,
+                    sendEmails: String(bool),
                 },
             },
             { upsert: false, returnDocument: "after" }

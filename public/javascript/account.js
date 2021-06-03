@@ -70,6 +70,10 @@ $(document).ready(function () {
         getRun(1);
     }
 
+    // override checkbox
+    $("#emailChecked")[0].checked = $("#emailChecked").attr("checked");
+
+
     $("#email_submit").click(function () {
         const email = $("#exampleInputEmail1").val();
         if (validateEmail(email)) {
