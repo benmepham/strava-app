@@ -13,6 +13,10 @@ async function post(req, res) {
     if (req.query["aspect-type"] == "create") {
         const user = await db.findUser(parseInt(req.query.owner_id));
 
+        if (!user.sendEmails) {
+            return console.log("webhook - user has no email");
+        }
+
         // refresh token Checks
         debug(user);
         let returned_access_token = await refreshToken.refreshToken(
@@ -51,12 +55,7 @@ async function post(req, res) {
         let emailHtml;
 
         // send email
-        email.sendMail(
-            "ben@bjm.me.uk",
-            runData.name + " Time",
-            emailText,
-            null
-        );
+        email.sendMail(user.email, runData.name + " Time", emailText, null);
     }
 }
 
