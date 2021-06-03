@@ -3,7 +3,7 @@ const debug = require("debug")("strava-app:db");
 
 let collection;
 
-module.exports = { loadDb, findUser, setEmail, setAlertOption };
+module.exports = { loadDb, findUser, setEmail, setAlertOption, setToken };
 
 function loadDb(environment) {
     const client = new MongoClient(process.env.DATABASE, {
@@ -61,6 +61,26 @@ async function setAlertOption(id, bool) {
             },
             { upsert: false, returnDocument: "after" }
         );
+        return res;
+    } catch (err) {
+        return console.log(err);
+    }
+}
+
+async function setToken(id, time, refresh, access) {
+    try {
+        res = await collection.findOneAndUpdate(
+            { id: id },
+            {
+                $set: {
+                    access_token: access,
+                    refresh_token: refresh,
+                    expires_at: time,
+                },
+            },
+            { upsert: false, returnDocument: "after" }
+        );
+        console.log("db done" + res.value.access_token);
         return res;
     } catch (err) {
         return console.log(err);

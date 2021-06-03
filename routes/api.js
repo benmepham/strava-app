@@ -8,7 +8,7 @@ exports.view = async function (req, res) {
         req.user.refresh_token,
         req.user.expires_at
     );
-    console.log(returned_access_token);
+    console.log("api access token" +returned_access_token);
     let runs = await runFetch.getRuns(
         returned_access_token,
         req.query.page,

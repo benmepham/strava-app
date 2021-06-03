@@ -1,6 +1,7 @@
 const fetch = require("node-fetch");
 const dotenv = require("dotenv");
 dotenv.config();
+const db = require("../util/db");
 
 exports.refreshToken = refreshToken;
 
@@ -25,28 +26,19 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
         );
         if (!resp.ok) {
             return console.error(resp.status);
-        } else {
-            const data = await resp.json();
-            // console.log(data);
-            collection.findOneAndUpdate(
-                { id: id },
-                {
-                    $set: {
-                        access_token: data.access_token,
-                        refresh_token: data.refresh_token,
-                        expires_at: data.expires_at,
-                    },
-                },
-                { upsert: true, returnDocument: "after" },
-                (err, doc) => {
-                    if (err) return console.error(err);
-                    // console.log(doc.value);
-                }
-            );
-            return data.access_token;
         }
-    } else {
-        // console.log("is fine");
-        return access_token;
+        const data = await resp.json();
+        console.log("ret code" + data.access_token);
+        const db_ret = await db.setToken(
+            id,
+            data.expires_at,
+            data.refresh_token,
+            data.access_token
+        );
+        console.log(db_ret.value);
+        return db_ret.value.access_token;
+        // return data.access_token;
     }
+    console.log("is fine");
+    return access_token;
 }
