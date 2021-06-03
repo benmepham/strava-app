@@ -1,1 +1,1 @@
-web: npm run prodstart
+web: npm run proddebugstart
