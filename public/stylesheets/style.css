@@ -11,9 +11,6 @@ body {
     padding-top: 3.5rem;
 }
 
-.maincontainer {
-    padding: 3rem 1.5rem;
-}
 .overlay {
     position: fixed;
     bottom: 0px;
@@ -26,4 +23,8 @@ body {
     opacity: 1;
     transition: all 0.1s;
     color: blueviolet;
+}
+
+a.btn {
+  color: white;
 }

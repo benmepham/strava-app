@@ -2,7 +2,7 @@ extends layout
 
 block content
   nav.navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark
-    a.navbar-brand(href='#') Strava App
+    a.navbar-brand(href='#') 5K App
     button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbarsExampleDefault' aria-controls='navbarsExampleDefault' aria-expanded='false' aria-label='Toggle navigation')
       span.navbar-toggler-icon
     #navbarsExampleDefault.collapse.navbar-collapse
@@ -14,17 +14,21 @@ block content
             a.nav-link(href='/account') Account
           li.nav-item
             a.nav-link(href='/logout') Logout
-  main(role='main')
+  main(role='main').mb-4
     .jumbotron
       .container
-        h1.display-3 Strava App (Beta)
-        h4 Sign in with your strava account to get your 5K run times.
+        h1.display-3 5K App
+        h4 Sign in with your Strava account to view your 5K run times.
         if user
           a(href="/account")
             button.btn.btn-primary(type='button') Account
         else
           a(href="/auth/strava")
             img(alt="Connect with Strava" src="/images/btn_strava.png")
+    .container
+      h2 Update Information
+      p Welcome to version 0.3 of my app!
+      p When you sign in again, you can enter your email address and be emailed your time each time you complete a run.
   footer.container
     p © BJM -
       a(href="https://github.com/benmepham/strava-app") GitHub

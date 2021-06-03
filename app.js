@@ -4,37 +4,26 @@ const helmet = require("helmet");
 const path = require("path");
 const passport = require("passport");
 const StravaStrategy = require("passport-strava-oauth2").Strategy;
-const dotenv = require("dotenv");
-const MongoClient = require("mongodb").MongoClient;
+// const dotenv = require("dotenv");
 const cookieSession = require("cookie-session");
 const debug = require("debug")("strava-app:appjs");
 
 const api = require("./routes/api");
+const email_api = require("./routes/email_api");
+
+const webhook = require("./routes/webhook");
+const db = require("./util/db");
+
 const app = express();
-dotenv.config();
+// dotenv.config();
 const environment = app.get("env");
-debug("NODE_ENV: " + environment);
+// debug("NODE_ENV: " + environment);
 
 var logger;
 if (environment == "development") logger = require("morgan");
+if (environment == "development") app.use(logger("dev"));
 
-let collection;
-const client = new MongoClient(process.env.DATABASE, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-});
-client.connect((err) => {
-    if (err) return console.error(err);
-    let dbName = "stravadb_dev";
-    if (environment == "production") {
-        dbName = "stravadb_prod";
-    }
-    collection = client.db(dbName).collection("users");
-    debug("DB Connected");
-    // perform actions on the collection object
-    // client.close();
-    global.collection = collection;
-});
+db.loadDb(environment);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -55,11 +44,10 @@ app.use(
         },
     })
 );
-if (environment == "development") app.use(logger("dev"));
+
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-
 app.use(
     cookieSession({
         maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
@@ -102,14 +90,7 @@ passport.use(
         function (accessToken, refreshToken, params, profile, done) {
             // asynchronous verification, for effect...
             process.nextTick(function () {
-                // To keep the example simple, the user's Strava profile is returned to
-                // represent the logged-in user.  In a typical application, you would want
-                // to associate the Strava account with a user record in your database,
-                // and return that user instead.
-
                 // console.log(profile);
-                // console.log("Exp", params.expires_in, params.expires_at);
-                // console.log("TOKENs:", accessToken, refreshToken);
 
                 collection.findOneAndUpdate(
                     { id: profile.id },
@@ -118,8 +99,9 @@ passport.use(
                             id: profile.id,
                             name: profile.displayName,
                             photo: profile.photos[0].value,
-                            email: profile.emails[0].value || "none",
+                            email: profile.emails[0].value,
                             created_on: new Date(),
+                            sendEmails: false,
                         },
                         $set: {
                             last_login: new Date(),
@@ -142,6 +124,8 @@ passport.use(
 );
 
 app.get("/api/activities", ensureAuthenticated, api.view);
+
+app.post("/api/email", email_api.email_db);
 
 app.get("/", function (req, res) {
     res.render("index", { user: req.user });
@@ -174,6 +158,9 @@ app.get(
     "/auth/strava/callback",
     passport.authenticate("strava", { failureRedirect: "/" }),
     function (req, res) {
+        if (req.user.login_count <= 1) {
+            return res.redirect("/account?new=true");
+        }
         res.redirect("/account");
     }
 );
@@ -182,6 +169,13 @@ app.get("/logout", function (req, res) {
     req.logout();
     res.redirect("/");
 });
+
+// webhooks
+
+app.post("/webhook", webhook.post);
+
+// Adds support for GET requests to our webhook
+app.get("/webhook", webhook.get);
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
