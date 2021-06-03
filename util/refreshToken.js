@@ -29,15 +29,16 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
         }
         const data = await resp.json();
         console.log("ret code" + data.access_token);
-        const db_ret = await db.setToken(
+        // don't await to slightly speed up loading
+        const db_ret = db.setToken(
             id,
             data.expires_at,
             data.refresh_token,
             data.access_token
         );
-        console.log(db_ret.value);
-        return db_ret.value.access_token;
-        // return data.access_token;
+        // console.log(db_ret.value);
+        // return db_ret.value.access_token;
+        return data.access_token;
     }
     console.log("is fine");
     return access_token;
