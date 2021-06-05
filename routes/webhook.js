@@ -55,8 +55,6 @@ async function post(req, res) {
             runData.name +
             " on " +
             runData.date +
-            " at " +
-            runData.time +
             "\nYour time is " +
             runData.time;
         let emailHtml;
