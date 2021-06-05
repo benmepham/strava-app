@@ -18,10 +18,13 @@ const app = express();
 // dotenv.config();
 const environment = app.get("env");
 // debug("NODE_ENV: " + environment);
+console.log(environment);
 
 var logger;
-if (environment == "development") logger = require("morgan");
-if (environment == "development") app.use(logger("dev"));
+// if (environment == "development") logger = require("morgan");
+// if (environment == "development") app.use(logger("dev"));
+logger = require("morgan");
+app.use(logger("dev"));
 
 db.loadDb(environment);
 
