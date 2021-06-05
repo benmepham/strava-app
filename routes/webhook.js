@@ -9,10 +9,12 @@ module.exports = { post, get };
 async function post(req, res) {
     debug("webhook event received!", req.query, req.body);
     res.status(200).send("EVENT_RECEIVED");
+    let body = req.body;
+    console.log(body["aspect_type"]);
 
-    if (req.body["aspect-type"] == "create") {
+    if (body["aspect_type"] == "create") {
         debug("create activity running");
-        const user = await db.findUser(parseInt(req.body.owner_id));
+        const user = await db.findUser(parseInt(body.owner_id));
 
         if (!user.sendEmails) {
             return console.log("webhook - user has no email");
@@ -29,9 +31,13 @@ async function post(req, res) {
 
         //get run data
         run = await runFetch.getActivityData(
-            req.body.object_id,
+            body.object_id,
             returned_access_token
         );
+
+        if (run.status != 200) {
+            return debug("run get error");
+        }
         run = run.data;
 
         if (run.type != "Run" || run.distance <= 5000) {
