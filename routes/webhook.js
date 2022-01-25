@@ -47,6 +47,7 @@ async function post(req, res) {
 
         debug(runData);
 
+        // body.event_time unix timestamp
         let emailText =
             "Hello " +
             user.name +
