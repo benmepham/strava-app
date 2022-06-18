@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  strava_app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: strava_app
+    container_name: strava_app
+    restart: unless-stopped
+    env_file: .env
+    # environment:
+      # - NODE_ENV=production # defaults to development
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+    command: ./wait-for.sh mongodb:27017 -- /home/node/app/node_modules/.bin/nodemon ./bin/www
+
+  mongodb:
+    image: mongo:5
+    container_name: mongodb
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=$MONGO_USER
+      - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASS
+      - MONGO_INITDB_DATABASE=$MONGO_DB
+    volumes:
+      - dbdata:/data/db
+
+volumes:
+  dbdata:
+  node_modules:

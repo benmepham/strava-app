@@ -6,7 +6,8 @@ let collection;
 module.exports = { loadDb, findUser, setEmail, setAlertOption, setToken };
 
 function loadDb(environment) {
-    const client = new MongoClient(process.env.DATABASE, {
+    const db_url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017/${process.env.MONGO_DB}?authSource=admin`;
+    const client = new MongoClient(db_url, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     });
