@@ -6,7 +6,7 @@ on:
 
 jobs:
   docker:
-    runs-on: buntu-latest
+    runs-on: ubuntu-latest
 
     permissions:
       packages: write
