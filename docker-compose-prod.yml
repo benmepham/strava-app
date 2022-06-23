@@ -23,6 +23,7 @@ services:
       - MONGO_INITDB_DATABASE=$MONGO_DB
     volumes:
       - dbdata_prod:/data/db
+    command: --quiet
 
 volumes:
   dbdata_prod:
