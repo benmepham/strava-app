@@ -6,7 +6,12 @@ on:
 
 jobs:
   docker:
-    runs-on: ubuntu-latest
+    runs-on: buntu-latest
+
+    permissions:
+      packages: write
+      contents: read
+
     steps:
       -
         name: Checkout
