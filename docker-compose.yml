@@ -16,7 +16,9 @@ services:
     volumes:
       - .:/home/node/app
       - node_modules:/home/node/app/node_modules
-    command: ./wait-for.sh mongodb:27017 -- /home/node/app/node_modules/.bin/nodemon ./bin/www
+    depends_on:
+      - mongodb
+    command: /home/node/app/node_modules/.bin/nodemon ./bin/www
 
   mongodb:
     image: mongo:5
