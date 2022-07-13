@@ -84,4 +84,7 @@ async function get(req, res) {
             res.sendStatus(403);
         }
     }
+    // If query is wrong, return with 400 Bad Request
+    res.sendStatus(400);
+    
 }
