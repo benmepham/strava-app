@@ -3,19 +3,17 @@ const express = require("express");
 const helmet = require("helmet");
 const path = require("path");
 const passport = require("passport");
-const StravaStrategy = require("passport-strava-oauth2").Strategy;
-// const dotenv = require("dotenv");
+const OAuth2Strategy = require("passport-oauth2");
+
 const cookieSession = require("cookie-session");
 const debug = require("debug")("strava-app:appjs");
 
 const api = require("./routes/api");
 const email_api = require("./routes/email_api");
-
 const webhook = require("./routes/webhook");
 const db = require("./util/db");
 
 const app = express();
-// dotenv.config();
 const environment = app.get("env");
 // debug("NODE_ENV: " + environment);
 console.log(environment);
@@ -68,41 +66,34 @@ app.use(passport.session());
 //   have a database of user records, the complete Strava profile is
 //   serialized and deserialized.
 passport.serializeUser(function (user, done) {
-    // console.log("Serialize");
-    // console.log(user);
     done(null, user);
 });
 
 passport.deserializeUser(function (obj, done) {
-    //console.log("DESERIALIZE:");
-    //console.log(obj);
     collection.findOne({ id: obj.id }, (err, doc) => {
-        //console.log("FOUND-----");
-        //console.log(doc);
         done(null, doc);
     });
 });
 
 passport.use(
-    new StravaStrategy(
+    new OAuth2Strategy(
         {
             clientID: process.env.STRAVA_CLIENT_ID,
             clientSecret: process.env.STRAVA_CLIENT_SECRET,
             callbackURL: process.env.CALLBACKURL,
+            authorizationURL: "https://www.strava.com/oauth/authorize",
+            tokenURL: "https://www.strava.com/oauth/token",
         },
         function (accessToken, refreshToken, params, profile, done) {
             // asynchronous verification, for effect...
             process.nextTick(function () {
-                // console.log(profile);
-
                 collection.findOneAndUpdate(
-                    { id: profile.id },
+                    { id: params.athlete.id },
                     {
                         $setOnInsert: {
-                            id: profile.id,
-                            name: profile.displayName,
-                            photo: profile.photos[0].value,
-                            email: profile.emails[0].value,
+                            id: params.athlete.id,
+                            name: (params.athlete.firstname + " " + params.athlete.lastname),
+                            photo: params.athlete.profile,
                             created_on: new Date(),
                             sendEmails: false,
                         },
@@ -117,7 +108,6 @@ passport.use(
                     { upsert: true, returnDocument: "after" },
                     (err, doc) => {
                         if (err) return console.error(err);
-                        //console.log(doc.value);
                         return done(null, doc.value);
                     }
                 );
@@ -145,7 +135,7 @@ app.get("/account", ensureAuthenticated, function (req, res) {
 //   will redirect the user back to this application at /auth/strava/callback
 app.get(
     "/auth/strava",
-    passport.authenticate("strava", {
+    passport.authenticate("oauth2", {
         // scope: ["activity:read_all,activity:read"],
         scope: ["activity:read"],
         // approvalPrompt: "auto",
@@ -159,7 +149,7 @@ app.get(
 //   which, in this example, will redirect the user to the home page.
 app.get(
     "/auth/strava/callback",
-    passport.authenticate("strava", { failureRedirect: "/" }),
+    passport.authenticate("oauth2", { failureRedirect: "/" }),
     function (req, res) {
         if (req.user.login_count <= 1) {
             return res.redirect("/account?new=true");
