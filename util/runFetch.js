@@ -22,29 +22,29 @@ async function getActivity(token, page) {
 }
 
 async function getRuns(token, page, num) {
-    // console.log("TOK gr: " + token);
+    try {
+        // console.log("TOK gr: " + token);
 
-    let pageIter = page;
-    let runs = [];
-    // console.log("page: ", page, "num: ", num);
+        let pageIter = page;
+        let runs = [];
+        // console.log("page: ", page, "num: ", num);
 
-    while (runs.length != num) {
-        // console.log(runs.length, "length");
-        const getActivity_return = await getActivity(token, pageIter);
-        if (getActivity_return.status != 200)
-            return {
-                error: true,
-                status: getActivity_return.status,
-            };
-        let run = getActivity_return.data;
-        // console.log("Fetched run");
-        if (run[0].type == "Run" && run[0].distance >= 5000) {
-            // console.log("isRun");
-            runs.push(run[0]);
+        while (runs.length != num) {
+            // console.log(runs.length, "length");
+            const getActivity_return = await getActivity(token, pageIter);
+            if (getActivity_return.status != 200)
+                return { status: getActivity_return.status };
+            let run = getActivity_return.data;
+            // console.log("Fetched run");
+            if (run[0].type == "Run" && run[0].distance >= 5000)
+                runs.push(run[0]);
+            pageIter++;
         }
-        pageIter++;
+        return { runs: runs, page: pageIter, status: 200 };
+    } catch (error) {
+        console.error(error);
+        throw "No more valid runs";
     }
-    return { runs: runs, page: pageIter };
 }
 
 async function getActivityData(activityId, token) {
@@ -64,18 +64,24 @@ async function getActivityData(activityId, token) {
 }
 
 function parseRun(run) {
-    let date = run.start_date.slice(0, 10);
-    let seconds = (run.best_efforts[5].moving_time % 60).toString();
-    if (seconds.length == 1) seconds = "0" + seconds;
-    let time =
-        Math.floor(run.best_efforts[5].moving_time / 60).toString() +
-        ":" +
-        seconds;
+    try {
+        let date = run.start_date.slice(0, 10);
+        console.log(run.best_efforts);
+        let seconds = (run.best_efforts[5].moving_time % 60).toString();
+        if (seconds.length == 1) seconds = "0" + seconds;
+        let time =
+            Math.floor(run.best_efforts[5].moving_time / 60).toString() +
+            ":" +
+            seconds;
 
-    return {
-        name: run.name,
-        date: date,
-        time: time,
-        id: run.id,
-    };
+        return {
+            name: run.name,
+            date: date,
+            time: time,
+            id: run.id,
+        };
+    } catch (error) {
+        console.error(error);
+        throw "Run data invalid";
+    }
 }

@@ -9,7 +9,8 @@ services:
     container_name: strava_app
     restart: unless-stopped
     env_file: .env
-    # environment:
+    environment:
+      - DEBUG=strava-app:*
       # - NODE_ENV=production # defaults to development
     ports:
       - 3000:3000
@@ -18,7 +19,7 @@ services:
       - node_modules:/home/node/app/node_modules
     depends_on:
       - mongodb
-    command: /home/node/app/node_modules/.bin/nodemon ./bin/www
+    command: npm run devstart
 
   mongodb:
     image: mongo:5

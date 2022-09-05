@@ -43,8 +43,9 @@ function getRun(page) {
                 );
                 $("#errorModal").modal("show");
             } else {
+                console.log(xhr, status, error);
                 var errorMessage = xhr.status + ": " + xhr.statusText;
-                alert("Error - " + errorMessage);
+                alert("Error - " + xhr.responseText);
             }
         },
     });
