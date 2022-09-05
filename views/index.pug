@@ -2,7 +2,7 @@ extends layout
 
 block content
   nav.navbar.navbar-expand-md.navbar-dark.fixed-top.bg-dark
-    a.navbar-brand(href='#') 5K App
+    a.navbar-brand(href='#') Strava App
     button.navbar-toggler(type='button' data-toggle='collapse' data-target='#navbarsExampleDefault' aria-controls='navbarsExampleDefault' aria-expanded='false' aria-label='Toggle navigation')
       span.navbar-toggler-icon
     #navbarsExampleDefault.collapse.navbar-collapse
@@ -17,8 +17,8 @@ block content
   main(role='main').mb-4
     .jumbotron
       .container
-        h1.display-3 5K App
-        h4 Sign in with your Strava account to view your 5K run times.
+        h1.display-3 Strava App
+        h4 Sign in with your Strava account to view your 5K and 10K run times.
         if user
           a(href="/account")
             button.btn.btn-primary(type='button') Account

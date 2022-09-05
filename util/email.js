@@ -17,7 +17,7 @@ setup().catch(console.error);
 
 async function sendMail(to, subject, text, html) {
     let info = await transporter.sendMail({
-        from: '"5K App" <'+process.env.EMAIL_USER+'>',
+        from: '"Strava App" <'+process.env.EMAIL_USER+'>',
         to: to,
         subject: subject,
         text: text,
