@@ -63,22 +63,30 @@ async function getActivityData(activityId, token) {
     }
 }
 
+function secondsToString(time) {
+    let mins = Math.floor(time / 60);
+    let secs = time - mins * 60;
+    let ret;
+    ret = mins + ":" + (secs < 10 ? "0" : "") + secs;
+    // ret += "" + secs;
+    return ret;
+}
+
 function parseRun(run) {
     try {
-        let date = run.start_date.slice(0, 10);
-        console.log(run.best_efforts);
-        let seconds = (run.best_efforts[5].moving_time % 60).toString();
-        if (seconds.length == 1) seconds = "0" + seconds;
-        let time =
-            Math.floor(run.best_efforts[5].moving_time / 60).toString() +
-            ":" +
-            seconds;
+        let time10k = "", time5k = secondsToString(run.best_efforts[5].moving_time);
+        try {
 
+            time10k = secondsToString(run.best_efforts[6].moving_time);
+        } catch {}
         return {
             name: run.name,
-            date: date,
-            time: time,
+            date: run.start_date.slice(0, 10),
+            time5k,
             id: run.id,
+            time10k,
+            distance: (run.distance / 1000).toFixed(2).toString() + " km",
+            timeMoving: secondsToString(run["moving_time"]),
         };
     } catch (error) {
         console.error(error);
