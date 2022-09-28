@@ -44,4 +44,4 @@ jobs:
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
             - name: Call webhook
-              run: curl -X POST -F 'secret=${{ secrets.WEBHOOK_SECRET }}' ${{secret.WEBHOOK_URL }}
+              run: curl -X POST -F 'secret=${{ secrets.WEBHOOK_SECRET }}' ${{secrets.WEBHOOK_URL }}
