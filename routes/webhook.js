@@ -10,14 +10,13 @@ async function post(req, res) {
     debug("webhook event received!", req.query, req.body);
     res.status(200).send("EVENT_RECEIVED");
     let body = req.body;
-    console.log(body["aspect_type"]);
 
     if (body["aspect_type"] == "create") {
         debug("create activity running");
         const user = await db.findUser(parseInt(body.owner_id));
 
         if (!user.sendEmails) {
-            return console.log("webhook - user has no email");
+            return debug("webhook - user has no email");
         }
 
         // refresh token Checks
@@ -49,17 +48,11 @@ async function post(req, res) {
 
         // body.event_time unix timestamp
         let emailText =
-            "Hello " +
-            user.name +
-            "\n" +
-            "You have completed a run, " +
-            runData.name +
-            " on " +
-            runData.date +
-            "\nYour time is " +
-            runData.time;
-        let emailHtml;
-
+            `Hello ${user.name}\nWell done, you have completed a run, ${runData.name}` +
+            "\n--- Stats: ---\n" +
+            `Date: ${runData.date}\nDistance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\n5K Time: ${runData.time5k}`
+        if (runData.time10k != "");
+            emailText+=`\n10K Time: ${runData.time10k}`;
         // send email
         email.sendMail(user.email, runData.name + " Time", emailText, null);
     }

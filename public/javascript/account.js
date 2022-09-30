@@ -14,7 +14,16 @@ function addToTable(data) {
             run.date +
             "</td>" +
             "<td>" +
-            run.time +
+            run.distance +
+            "</td>" +
+            "<td>" +
+            run.timeMoving +
+            "</td>" +
+            "<td>" +
+            run.time5k +
+            "</td>" +
+            "<td>" +
+            run.time10k +
             "</td>" +
             "</tr>";
     }

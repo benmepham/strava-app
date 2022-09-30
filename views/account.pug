@@ -25,7 +25,10 @@ block content
           tr
             th(scope='col') Name
             th(scope='col') Date
+            th(scope='col') Distance
+            th(scope='col') Moving Time
             th(scope='col') 5K Time
+            th(scope='col') 10K Time
         tbody
       p
         a.btn.btn-primary(id="get") More
@@ -64,7 +67,7 @@ block content
       .modal-dialog(role='document')
         .modal-content
           .modal-header
-            h5#emailModalLabel.modal-title Welcome to the 5K App
+            h5#emailModalLabel.modal-title Welcome to the Strava App
             button.close(type='button' data-dismiss='modal' aria-label='Close')
               span(aria-hidden='true') &times;
           .modal-body
