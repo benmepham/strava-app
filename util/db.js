@@ -6,18 +6,14 @@ let collection;
 module.exports = { loadDb, findUser, setEmail, setAlertOption, setToken };
 
 function loadDb(environment) {
-    const db_url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017/${process.env.MONGO_DB}?authSource=admin`;
+    const db_url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017?authSource=admin`;
     const client = new MongoClient(db_url, {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     });
     client.connect((err) => {
         if (err) return console.error(err);
-        let dbName = "stravadb_dev";
-        if (environment == "production") {
-            dbName = "stravadb_prod";
-        }
-        collection = client.db(dbName).collection("users");
+        collection = client.db(process.env.MONGO_DB).collection("users");
         debug("DB Connected");
         // perform actions on the collection object
         // client.close();
