@@ -8,11 +8,16 @@ Available at: [strava.bjm.me.uk](https://strava.bjm.me.uk)
 
 - Setup a Strava API Application [here](https://www.strava.com/settings/api)
 - Copy `sample.env` to `.env` and change values
-- `docker-compose up -d`
+- `docker-compose -f docker-compose-dev.yml up -d` to start the DB
+- `npm ci` to install packages
+- `node run devstart` to start the server: [localhost:3000](http://localhost:3000)
 
 ## Production Setup
 
-- Same as Development, but use `docker-compose-prod.yml` instead
+- Setup a Strava API Application [here](https://www.strava.com/settings/api)
+- Copy `sample.env` to `.env` and change values
+- `docker-compose up -d` to start the DB and server
+- Access the server: [localhost:3000](http://localhost:3000)
 
 ## Webhook Setup
 

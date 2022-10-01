@@ -2,37 +2,29 @@ version: '3'
 
 services:
   strava_app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: strava_app
+    image: ghcr.io/benmepham/strava-app
     container_name: strava_app
     restart: unless-stopped
     env_file: .env
     environment:
-      - DEBUG=strava-app:*
-      # - NODE_ENV=production # defaults to development
+      - NODE_ENV=production # defaults to development
     ports:
       - 3000:3000
-    volumes:
-      - .:/home/node/app
-      - node_modules:/home/node/app/node_modules
     depends_on:
       - mongodb
-    command: npm run devstart
+    command: node ./bin/www
 
   mongodb:
     image: mongo:5
     container_name: mongodb
     restart: unless-stopped
-    env_file: .env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=$MONGO_USER
       - MONGO_INITDB_ROOT_PASSWORD=$MONGO_PASS
       - MONGO_INITDB_DATABASE=$MONGO_DB
     volumes:
-      - dbdata:/data/db
+      - dbdata_prod:/data/db
+    command: --quiet
 
 volumes:
-  dbdata:
-  node_modules:
+  dbdata_prod:
