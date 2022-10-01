@@ -46,5 +46,6 @@ jobs:
                   push: true
                   tags: ${{ steps.meta.outputs.tags }}
                   labels: ${{ steps.meta.outputs.labels }}
+                  build-args: VERSION=${{ github.ref }}
             - name: Call webhook
               run: curl -X POST -F 'secret=${{ secrets.WEBHOOK_SECRET }}' ${{secrets.WEBHOOK_URL }}

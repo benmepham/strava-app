@@ -1,5 +1,8 @@
 FROM node:16
 
+ARG VERSION
+ENV VERSION_ENV=$VERSION
+
 RUN mkdir -p /home/node/app/node_modules
 
 WORKDIR /home/node/app

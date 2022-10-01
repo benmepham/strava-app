@@ -19,7 +19,7 @@ const app = express();
 const environment = app.get("env");
 // debug("NODE_ENV: " + environment);
 console.log(environment);
-
+console.log(process.env.VERSION_ENV);
 var logger;
 // if (environment == "development") logger = require("morgan");
 // if (environment == "development") app.use(logger("dev"));
