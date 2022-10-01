@@ -36,7 +36,6 @@ app.use(helmet());
 app.use(
     helmet.contentSecurityPolicy({
         directives: {
-            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
             "script-src": [
                 "'self'",
                 "cdn.jsdelivr.net",
@@ -56,7 +55,9 @@ let sessionSetup = {
     resave: false,
     saveUninitialized: true,
     cookie: { secure: false, maxAge: 3600000 * 24 * 90 },
-    store: MongoStore.create({ mongoUrl: `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017/${process.env.MONGO_DB}?authSource=admin` })
+    store: MongoStore.create({
+        mongoUrl: `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017/${process.env.MONGO_DB}?authSource=admin`,
+    }),
 };
 if (environment == "production") {
     app.set("trust proxy", 1); // trust first proxy
