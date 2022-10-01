@@ -5,7 +5,9 @@ const path = require("path");
 const passport = require("passport");
 const OAuth2Strategy = require("passport-oauth2");
 
-const cookieSession = require("cookie-session");
+const session = require("express-session");
+const MongoStore = require("connect-mongo");
+
 const debug = require("debug")("strava-app:appjs");
 
 const api = require("./routes/api");
@@ -24,7 +26,7 @@ var logger;
 logger = require("morgan");
 app.use(logger("dev"));
 
-db.loadDb(environment);
+db.loadDb();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -34,14 +36,8 @@ app.use(helmet());
 app.use(
     helmet.contentSecurityPolicy({
         directives: {
-            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
-            "script-src": [
-                "'self'",
-                "cdn.jsdelivr.net",
-                "stackpath.bootstrapcdn.com",
-                "code.jquery.com",
-            ],
-            "style-src": ["'self'", "stackpath.bootstrapcdn.com"],
+            "script-src": ["'self'", "cdnjs.cloudflare.com"],
+            "style-src": ["'self'", "cdnjs.cloudflare.com"],
         },
     })
 );
@@ -49,12 +45,21 @@ app.use(
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(
-    cookieSession({
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
-        keys: [process.env.SECRET],
-    })
-);
+let sessionSetup = {
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false, maxAge: 3600000 * 24 * 90 },
+    store: MongoStore.create({
+        mongoUrl: `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017/${process.env.MONGO_DB}?authSource=admin`,
+    }),
+};
+if (environment == "production") {
+    app.set("trust proxy", 1); // trust first proxy
+    sessionSetup.cookie.secure = true; // serve secure cookies
+}
+app.use(session(sessionSetup));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -92,7 +97,10 @@ passport.use(
                     {
                         $setOnInsert: {
                             id: params.athlete.id,
-                            name: (params.athlete.firstname + " " + params.athlete.lastname),
+                            name:
+                                params.athlete.firstname +
+                                " " +
+                                params.athlete.lastname,
                             photo: params.athlete.profile,
                             created_on: new Date(),
                             sendEmails: false,
