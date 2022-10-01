@@ -36,13 +36,8 @@ app.use(helmet());
 app.use(
     helmet.contentSecurityPolicy({
         directives: {
-            "script-src": [
-                "'self'",
-                "cdn.jsdelivr.net",
-                "stackpath.bootstrapcdn.com",
-                "code.jquery.com",
-            ],
-            "style-src": ["'self'", "stackpath.bootstrapcdn.com"],
+            "script-src": ["'self'", "cdnjs.cloudflare.com"],
+            "style-src": ["'self'", "cdnjs.cloudflare.com"],
         },
     })
 );
