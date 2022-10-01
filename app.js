@@ -5,7 +5,8 @@ const path = require("path");
 const passport = require("passport");
 const OAuth2Strategy = require("passport-oauth2");
 
-const cookieSession = require("cookie-session");
+const session = require("express-session");
+
 const debug = require("debug")("strava-app:appjs");
 
 const api = require("./routes/api");
@@ -49,12 +50,18 @@ app.use(
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
-app.use(
-    cookieSession({
-        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days in milliseconds
-        keys: [process.env.SECRET],
-    })
-);
+let sessionSetup = {
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+};
+if (environment == "production") {
+    app.set("trust proxy", 1); // trust first proxy
+    sessionSetup.cookie.secure = true; // serve secure cookies
+}
+app.use(session(sessionSetup));
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -92,7 +99,10 @@ passport.use(
                     {
                         $setOnInsert: {
                             id: params.athlete.id,
-                            name: (params.athlete.firstname + " " + params.athlete.lastname),
+                            name:
+                                params.athlete.firstname +
+                                " " +
+                                params.athlete.lastname,
                             photo: params.athlete.profile,
                             created_on: new Date(),
                             sendEmails: false,
