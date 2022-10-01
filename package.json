@@ -10,13 +10,14 @@
     "proddebugstart": "DEBUG=strava-app:* npm run start"
   },
   "dependencies": {
+    "connect-mongo": "^4.6.0",
     "debug": "~4.3.4",
     "dotenv": "^8.6.0",
     "express": "~4.17.1",
     "express-session": "^1.17.3",
     "helmet": "^4.6.0",
     "http-errors": "~1.8.0",
-    "mongodb": "^3.6.9",
+    "mongodb": "^4.10.0",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.1",
     "nodemailer": "^6.6.2",

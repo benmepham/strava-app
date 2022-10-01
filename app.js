@@ -6,6 +6,7 @@ const passport = require("passport");
 const OAuth2Strategy = require("passport-oauth2");
 
 const session = require("express-session");
+const MongoStore = require("connect-mongo");
 
 const debug = require("debug")("strava-app:appjs");
 
@@ -25,7 +26,7 @@ var logger;
 logger = require("morgan");
 app.use(logger("dev"));
 
-db.loadDb(environment);
+db.loadDb();
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -54,7 +55,8 @@ let sessionSetup = {
     secret: process.env.SECRET,
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false },
+    cookie: { secure: false, maxAge: 3600000 * 24 * 90 },
+    store: MongoStore.create({ mongoUrl: `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017/${process.env.MONGO_DB}?authSource=admin` })
 };
 if (environment == "production") {
     app.set("trust proxy", 1); // trust first proxy
