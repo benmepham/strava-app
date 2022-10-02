@@ -28,6 +28,18 @@ app.use(logger("dev"));
 
 db.loadDb();
 
+// Version number from GitHub actions
+let version = "dev";
+if (process.env.VERSION_ENV) {
+    if (process.env.VERSION_ENV.startsWith("refs/heads/main"))
+        version = process.env.VERSION_ENV.match(/(?!-)([\w\d]){7}/);
+    else
+        version = process.env.VERSION_ENV.substring(
+            0,
+            process.env.VERSION_ENV.indexOf("-")
+        );
+}
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
@@ -129,11 +141,11 @@ app.get("/api/activities", ensureAuthenticated, api.view);
 app.post("/api/email", email_api.email_db);
 
 app.get("/", function (req, res) {
-    res.render("index", { user: req.user });
+    res.render("index", { user: req.user, version });
 });
 
 app.get("/account", ensureAuthenticated, function (req, res) {
-    res.render("account", { user: req.user });
+    res.render("account", { user: req.user, version });
 });
 
 // GET /auth/strava
