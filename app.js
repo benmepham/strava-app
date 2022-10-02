@@ -35,7 +35,7 @@ if (process.env.VERSION_ENV) {
         version = process.env.VERSION_ENV.match(/(?!-)([\w\d]){7}/)[0];
     else
         version = process.env.VERSION_ENV.substring(
-            0,
+            10,
             process.env.VERSION_ENV.indexOf("-")
         );
 }
