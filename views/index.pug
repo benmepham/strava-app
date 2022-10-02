@@ -21,15 +21,7 @@ block content
         h4 Sign in with your Strava account to view your 5K and 10K run times.
         if user
           a(href="/account")
-            button.btn.btn-primary(type='button') Account
+            button.mt-2.btn.btn-primary(type='button') Account
         else
           a(href="/auth/strava")
             img(alt="Connect with Strava" src="/images/btn_strava.png")
-    .container
-      h2 Update Information
-      p Welcome to version 0.3 of my app!
-      p When you sign in again, you can enter your email address and be emailed your time each time you complete a run.
-  footer.container
-    p © BJM -
-      a(href="https://github.com/benmepham/strava-app") GitHub
-
