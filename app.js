@@ -32,7 +32,7 @@ db.loadDb();
 let version = "dev";
 if (process.env.VERSION_ENV) {
     if (process.env.VERSION_ENV.startsWith("refs/heads/main"))
-        version = process.env.VERSION_ENV.match(/(?!-)([\w\d]){7}/);
+        version = process.env.VERSION_ENV.match(/(?!-)([\w\d]){7}/)[0];
     else
         version = process.env.VERSION_ENV.substring(
             0,
