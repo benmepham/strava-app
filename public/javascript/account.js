@@ -23,7 +23,13 @@ function addToTable(data) {
             run.time5k +
             "</td>" +
             "<td>" +
+            run.pace5k +
+            "</td>" +
+            "<td>" +
             run.time10k +
+            "</td>" +
+            "<td>" +
+            run.pace10k +
             "</td>" +
             "</tr>";
     }

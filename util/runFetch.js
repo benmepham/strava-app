@@ -65,7 +65,7 @@ async function getActivityData(activityId, token) {
 
 function secondsToString(time) {
     let mins = Math.floor(time / 60);
-    let secs = time - mins * 60;
+    let secs = Math.round(time - mins * 60);
     let ret;
     ret = mins + ":" + (secs < 10 ? "0" : "") + secs;
     // ret += "" + secs;
@@ -74,17 +74,21 @@ function secondsToString(time) {
 
 function parseRun(run) {
     try {
-        let time10k = "", time5k = secondsToString(run.best_efforts[5].moving_time);
+        let time10k = "",
+            pace10k = "",
+            time5k = secondsToString(run.best_efforts[5].moving_time);
         try {
-
             time10k = secondsToString(run.best_efforts[6].moving_time);
+            pace10k = secondsToString(run.best_efforts[6].moving_time / 10);
         } catch {}
         return {
             name: run.name,
             date: run.start_date.slice(0, 10),
             time5k,
+            pace5k: secondsToString(run.best_efforts[5].moving_time / 5),
             id: run.id,
             time10k,
+            pace10k,
             distance: (run.distance / 1000).toFixed(2).toString() + " km",
             timeMoving: secondsToString(run["moving_time"]),
         };
