@@ -52,8 +52,8 @@ async function post(req, res) {
             `Date: ${runData.date}\n` +
             `Distance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\n` +
             `5K Time: ${runData.time5k}\n5K Pace: ${runData.pace5k}`;
-        if (runData.time10k != "");
-        emailText += `\n10K Time: ${runData.time10k}\n10K Pace: ${runData.pace10k}`;
+        if (runData.time10k != "")
+            emailText += `\n10K Time: ${runData.time10k}\n10K Pace: ${runData.pace10k}`;
         // send email
         email.sendMail(user.email, runData.name + " Time", emailText, null);
     }

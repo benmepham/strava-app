@@ -1,5 +1,6 @@
 var refreshToken = require("../util/refreshToken");
 var runFetch = require("../util/runFetch");
+const debug = require("debug")("strava-app:api");
 
 exports.view = async function (req, res) {
     let returned_access_token = await refreshToken.refreshToken(
@@ -8,7 +9,7 @@ exports.view = async function (req, res) {
         req.user.refresh_token,
         req.user.expires_at
     );
-    console.log("api access token " + returned_access_token);
+    debug("api access token " + returned_access_token);
 
     try {
         let runs = await runFetch.getRuns(
