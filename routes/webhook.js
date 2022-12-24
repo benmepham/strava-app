@@ -46,13 +46,14 @@ async function post(req, res) {
 
         debug(runData);
 
-        // body.event_time unix timestamp
         let emailText =
             `Hello ${user.name}\nWell done, you have completed a run, ${runData.name}` +
             "\n--- Stats: ---\n" +
-            `Date: ${runData.date}\nDistance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\n5K Time: ${runData.time5k}`
+            `Date: ${runData.date}\n` +
+            `Distance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\n` +
+            `5K Time: ${runData.time5k}\n5K Pace: ${runData.pace5k}`;
         if (runData.time10k != "");
-            emailText+=`\n10K Time: ${runData.time10k}`;
+        emailText += `\n10K Time: ${runData.time10k}\n10K Pace: ${runData.pace10k}`;
         // send email
         email.sendMail(user.email, runData.name + " Time", emailText, null);
     }
@@ -79,5 +80,4 @@ async function get(req, res) {
     }
     // If query is wrong, return with 400 Bad Request
     res.sendStatus(400);
-    
 }
