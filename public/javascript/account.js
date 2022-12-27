@@ -1,4 +1,4 @@
-function addToTable(data) {
+function addToTable(data, table) {
     let rows;
     for (let i = 0; i < data.runs.length; i++) {
         const run = data.runs[i];
@@ -33,20 +33,21 @@ function addToTable(data) {
             "</td>" +
             "</tr>";
     }
-    $("table tbody").append(rows);
+    $("#" + table).append(rows);
+    document.getElementById(table).removeAttribute("hidden");
 }
 
-function getRun(page) {
+function getRun(url, table) {
     $.ajax({
         type: "GET",
-        url: "/api/activities?page=" + page + "&num=1",
+        url: url,
         dataType: "json",
         beforeSend: function () {
             $(".loader").removeClass("invisible");
         },
         success: function (data) {
-            $("table").data("page", data.page);
-            addToTable(data);
+            if (table == "table1") $("#" + table).data("page", data.page);
+            addToTable(data, table);
         },
         complete: function () {
             $(".loader").addClass("invisible");
@@ -59,7 +60,7 @@ function getRun(page) {
                 $("#errorModal").modal("show");
             } else {
                 console.log(xhr, status, error);
-                var errorMessage = xhr.status + ": " + xhr.statusText;
+                // var errorMessage = xhr.status + ": " + xhr.statusText;
                 alert("Error - " + xhr.responseText);
             }
         },
@@ -78,17 +79,15 @@ function validateEmail(email) {
 }
 
 $(document).ready(function () {
-    $("table").data("page", 1);
+    $("#table1").data("page", 1);
+
     const queryParamsString = window.location.search.substr(1);
     if (queryParamsString == "new=true") {
         $("#emailModal").modal("show");
-    } else {
-        getRun(1);
     }
 
     // override checkbox
     $("#emailChecked")[0].checked = $("#emailChecked").attr("checked");
-
 
     $("#email_submit").click(function () {
         const email = $("#exampleInputEmail1").val();
@@ -108,14 +107,29 @@ $(document).ready(function () {
     });
 
     $("#get").click(function () {
-        const page = $("table").data("page");
-        getRun(page);
+        const page = $("#table1").data("page");
+        getRun(
+            "/api/activities?num=" +
+                document.getElementById("getNumber").value +
+                "&page=" +
+                page,
+            "table1"
+        );
+    });
+
+    $("#activityUrlGet").click(function () {
+        const table = document.getElementById("table2");
+        if (table.rows.length > 1) table.deleteRow(1);
+        getRun(
+            "/api/activities?url=" +
+                document.getElementById("activityUrl").value,
+            "table2"
+        );
     });
 
     $("#updateSettings").click(function () {
         const email = $("#email").val();
         const checkedEmail = $("#emailChecked").is(":checked");
-        console.log(checkedEmail);
         if (validateEmail(email)) {
             $.ajax({
                 url: "/api/email?email=" + email + "&enabled=" + checkedEmail,
