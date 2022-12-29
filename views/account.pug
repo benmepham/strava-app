@@ -20,7 +20,7 @@ block content
       h1= "Hello " + user.name
       br
       h2 Activities
-      table.table
+      table.table#table1(hidden)
         thead
           tr
             th(scope='col') Name
@@ -32,11 +32,31 @@ block content
             th(scope='col') 10K Time
             th(scope='col') 10K Pace
         tbody
-      p
-        a.btn.btn-primary(id="get") More
+      .row
+        a.btn.btn-primary.d-inline#get Get
+        input#getNumber.form-control.d-inline(type='number' min="1" max="5" value="1")
+
+      h2.mt-4 Specific Activity
+      table.table#table2(hidden)
+        thead
+          tr
+            th(scope='col') Name
+            th(scope='col') Date
+            th(scope='col') Distance
+            th(scope='col') Moving Time
+            th(scope='col') 5K Time
+            th(scope='col') 5K Pace
+            th(scope='col') 10K Time
+            th(scope='col') 10K Pace
+        tbody
+      div
+        label(for='activityUrl') Enter Activity URL or Activity ID
+        input#activityUrl.form-control(type='text' aria-describedby='activityUrlHelp' placeholder='Enter URL')
+        small#activityUrlHelp.form-text.text-muted Either from the Strava App or Website, paste the Activity ID or URL (in the format https://strava.app.link/12345 or https://www.strava.com/activities/12345 )
+        button#activityUrlGet.my-2.btn.btn-primary(type='submit') Fetch
 
     .container-sm.settings
-      h2 Settings
+      h2.mt-4 Settings
       form
         .form-group
           label(for='email') Email:
@@ -45,7 +65,7 @@ block content
           label
             input#emailChecked(type='checkbox' checked=(user.sendEmails == "true" ? true : false))
             |  Enable emails
-        a.btn.btn-primary(id="updateSettings") Update
+        a.btn.btn-primary#updateSettings Update
 
   // Modal
   #errorModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
@@ -80,7 +100,7 @@ block content
                 small#emailHelp.form-text.text-muted We&apos;ll never share your email with anyone else.
           .modal-footer
             button.btn.btn-secondary(type='button' data-dismiss='modal') Close
-            button.btn.btn-primary(id="email_submit" type='button') Sign up to emails
+            button.btn.btn-primary#email_submit(type='button') Sign up to emails
 
   script(src='/javascript/account.js')
 

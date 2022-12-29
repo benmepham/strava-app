@@ -119,10 +119,12 @@ $(document).ready(function () {
 
     $("#activityUrlGet").click(function () {
         const table = document.getElementById("table2");
+        const url = document.getElementById("activityUrl").value;
         if (table.rows.length > 1) table.deleteRow(1);
+        if (!url) return alert('Please enter data')
         getRun(
             "/api/activities?url=" +
-                document.getElementById("activityUrl").value,
+                url,
             "table2"
         );
     });
