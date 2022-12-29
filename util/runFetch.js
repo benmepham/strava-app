@@ -73,14 +73,16 @@ function secondsToString(time) {
 }
 
 function parseRun(run) {
+    if (run.type != 'Run')
+        throw 'Activity is not a run'
     try {
         let time10k = "",
             pace10k = "",
             time5k = secondsToString(run.best_efforts[5].moving_time);
-        try {
+        if (run.best_efforts[6]) {
             time10k = secondsToString(run.best_efforts[6].moving_time);
             pace10k = secondsToString(run.best_efforts[6].moving_time / 10);
-        } catch {}
+        }
         return {
             name: run.name,
             date: run.start_date.slice(0, 10),
@@ -94,6 +96,6 @@ function parseRun(run) {
         };
     } catch (error) {
         console.error(error);
-        throw "Run data invalid";
+        throw "Error parsing run data";
     }
 }
