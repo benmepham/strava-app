@@ -14,9 +14,12 @@ exports.view = async function (req, res) {
 
     let activityUrl = req.query.url;
     if (activityUrl) {
-        if (activityUrl.startsWith("https://www.strava.com/activities/"))
+        if (activityUrl.includes("strava.com/activities/"))
             activityUrl = activityUrl.match(/(?!\/activities\/)([0-9]){10}/)[0];
-        else if (activityUrl.startsWith("https://strava.app.link/")) {
+        else if (activityUrl.includes("strava.app.link/")) {
+            activityUrl =
+                "https://" +
+                activityUrl.match(/strava.app.link\/[0-9a-zA-Z]{11}/)[0];
             activityUrl = await parseStravaAppLinkUrl(activityUrl);
             if (!activityUrl)
                 return res.status(400).send("strava.app.link URL is invalid");
