@@ -59,9 +59,16 @@ function getRun(url, table) {
                 );
                 $("#errorModal").modal("show");
             } else {
-                console.log(xhr, status, error);
-                // var errorMessage = xhr.status + ": " + xhr.statusText;
-                alert("Error - " + xhr.responseText);
+                console.error(xhr, status, error);
+                if (table == "table2") {
+                    document.getElementById(
+                        "activityUrlInvalidFeedback"
+                    ).innerText =
+                        "Error - " + xhr.status + ": " + xhr.responseText;
+                    document
+                        .getElementById("activityUrl")
+                        .classList.add("is-invalid");
+                } else alert("Error - " + xhr.status + ": " + xhr.responseText);
             }
         },
     });
@@ -99,8 +106,8 @@ $(document).ready(function () {
                     window.location.replace("/account");
                 },
                 error: function (xhr, status, error) {
-                    var errorMessage = xhr.status + ": " + xhr.statusText;
-                    alert("Error - " + errorMessage);
+                    console.error(xhr, status, error);
+                    alert("Error - " + xhr.status + ": " + xhr.responseText);
                 },
             });
         }
@@ -119,14 +126,23 @@ $(document).ready(function () {
 
     $("#activityUrlGet").click(function () {
         const table = document.getElementById("table2");
-        const url = document.getElementById("activityUrl").value;
+        const urlElement = document.getElementById("activityUrl");
+        const url = urlElement.value;
         if (table.rows.length > 1) table.deleteRow(1);
-        if (!url) return alert('Please enter data')
-        getRun(
-            "/api/activities?url=" +
-                url,
-            "table2"
-        );
+
+        // quick sanity check before sending to back end
+        if (
+            !url.includes("strava.com/activities/") &&
+            !url.includes("strava.app.link/") &&
+            !/^\d{10}$/.test(url)
+        ) {
+            document.getElementById("activityUrlInvalidFeedback").innerText =
+                "Please enter a valid activity ID or URL";
+            urlElement.classList.add("is-invalid");
+            return;
+        }
+        urlElement.classList.remove("is-invalid");
+        getRun("/api/activities?url=" + url, "table2");
     });
 
     $("#updateSettings").click(function () {
@@ -140,8 +156,8 @@ $(document).ready(function () {
                     alert("Updated successfully");
                 },
                 error: function (xhr, status, error) {
-                    var errorMessage = xhr.status + ": " + xhr.statusText;
-                    alert("Error - " + errorMessage);
+                    console.error(xhr, status, error);
+                    alert("Error - " + xhr.status + ": " + xhr.responseText);
                 },
             });
         }
