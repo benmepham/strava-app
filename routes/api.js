@@ -14,12 +14,14 @@ exports.view = async function (req, res) {
 
     let activityUrl = req.query.url;
     if (activityUrl) {
-        if (activityUrl.includes("strava.com/activities/"))
-            activityUrl = activityUrl.match(/(?!\/activities\/)([0-9]){10}/)[0];
-        else if (activityUrl.includes("strava.app.link/")) {
+        const stravaUrlRegex = /(?!strava.com\/activities\/)([0-9]){10}/;
+        const stravaShortUrlRegex = /strava.app.link\/[0-9a-zA-Z]{11}/;
+        if (activityUrl.match(stravaUrlRegex))
+            activityUrl = activityUrl.match(stravaUrlRegex)[0];
+        else if (activityUrl.match(stravaShortUrlRegex)) {
             activityUrl =
                 "https://" +
-                activityUrl.match(/strava.app.link\/[0-9a-zA-Z]{11}/)[0];
+                activityUrl.match(stravaShortUrlRegex)[0];
             activityUrl = await parseStravaAppLinkUrl(activityUrl);
             if (!activityUrl)
                 return res.status(400).send("strava.app.link URL is invalid");
@@ -47,8 +49,10 @@ exports.view = async function (req, res) {
             return res.status(400).send(error);
         }
         return res.send({ runs: [runData] });
+    
     }
 
+    // if 
     if (req.query.num < 1 || req.query.num > 5 || req.query.page < 1)
         return res
             .status(400)
