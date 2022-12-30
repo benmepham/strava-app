@@ -10,13 +10,18 @@ async function post(req, res) {
     debug("webhook event received!", req.query, req.body);
     res.status(200).send("EVENT_RECEIVED");
     let body = req.body;
+    console.log(body);
 
     if (body["aspect_type"] == "create") {
         debug("create activity running");
         const user = await db.findUser(parseInt(body.owner_id));
 
+        if (!user) {
+            return debug("user does not exist")
+        }
+
         if (!user.sendEmails) {
-            return debug("webhook - user has no email");
+            return debug("user has no email");
         }
 
         // refresh token Checks
