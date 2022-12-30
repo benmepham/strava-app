@@ -4,10 +4,10 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "devstart": "nodemon ./bin/www",
-    "debugstart": "DEBUG=strava-app:* npm run devstart",
-    "fulldebugstart": "DEBUG=* npm run devstart",
-    "proddebugstart": "DEBUG=strava-app:* npm run start"
+    "start:dev": "nodemon ./bin/www",
+    "start:dev-debug": "DEBUG=strava-app:* npm run start:dev",
+    "start:dev-debug-all": "DEBUG=* npm run start:dev",
+    "start:debug": "DEBUG=strava-app:* npm run start"
   },
   "dependencies": {
     "connect-mongo": "^4.6.0",
