@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const debug = require("debug")("strava-app:runFetch");
 
 module.exports = { getActivity, getRuns, getActivityData, parseRun };
 
@@ -13,7 +14,7 @@ async function getActivity(token, page) {
     );
 
     if (!resp.ok) {
-        console.error("getActivity Error:", resp.status);
+        debug("getActivity Error:", resp.status);
         return { status: resp.status };
     } else {
         const data = await resp.json();
@@ -23,26 +24,20 @@ async function getActivity(token, page) {
 
 async function getRuns(token, page, num) {
     try {
-        // console.log("TOK gr: " + token);
-
         let pageIter = page;
         let runs = [];
-        // console.log("page: ", page, "num: ", num);
-
         while (runs.length != num) {
-            // console.log(runs.length, "length");
             const getActivity_return = await getActivity(token, pageIter);
             if (getActivity_return.status != 200)
                 return { status: getActivity_return.status };
             let run = getActivity_return.data;
-            // console.log("Fetched run");
-            if (run[0].type == "Run" && run[0].distance >= 5000)
+            if (run[0].type == "Run" && run[0].distance >= 5000 && !run[0].manual)
                 runs.push(run[0]);
             pageIter++;
         }
         return { runs: runs, page: pageIter, status: 200 };
     } catch (error) {
-        console.error(error);
+        debug(error);
         throw "No more valid runs";
     }
 }
@@ -55,7 +50,7 @@ async function getActivityData(activityId, token) {
         }
     );
     if (!resp.ok) {
-        console.error("getActivityData Error:", resp.status);
+        debug("getActivityData Error:", resp.status);
         return { status: resp.status };
     } else {
         const data = await resp.json();
@@ -95,7 +90,7 @@ function parseRun(run) {
             timeMoving: secondsToString(run["moving_time"]),
         };
     } catch (error) {
-        console.error(error);
+        debug(error);
         throw "Error parsing run data";
     }
 }
