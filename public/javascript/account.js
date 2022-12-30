@@ -1,4 +1,4 @@
-function addToTable(data) {
+function addToTable(data, table) {
     let rows;
     for (let i = 0; i < data.runs.length; i++) {
         const run = data.runs[i];
@@ -33,20 +33,21 @@ function addToTable(data) {
             "</td>" +
             "</tr>";
     }
-    $("table tbody").append(rows);
+    $("#" + table).append(rows);
+    document.getElementById(table).removeAttribute("hidden");
 }
 
-function getRun(page) {
+function getRun(url, table) {
     $.ajax({
         type: "GET",
-        url: "/api/activities?page=" + page + "&num=1",
+        url: url,
         dataType: "json",
         beforeSend: function () {
             $(".loader").removeClass("invisible");
         },
         success: function (data) {
-            $("table").data("page", data.page);
-            addToTable(data);
+            if (table == "table1") $("#" + table).data("page", data.page);
+            addToTable(data, table);
         },
         complete: function () {
             $(".loader").addClass("invisible");
@@ -58,9 +59,16 @@ function getRun(page) {
                 );
                 $("#errorModal").modal("show");
             } else {
-                console.log(xhr, status, error);
-                var errorMessage = xhr.status + ": " + xhr.statusText;
-                alert("Error - " + xhr.responseText);
+                console.error(xhr, status, error);
+                if (table == "table2") {
+                    document.getElementById(
+                        "activityUrlInvalidFeedback"
+                    ).innerText =
+                        "Error - " + xhr.status + ": " + xhr.responseText;
+                    document
+                        .getElementById("activityUrl")
+                        .classList.add("is-invalid");
+                } else alert("Error - " + xhr.status + ": " + xhr.responseText);
             }
         },
     });
@@ -78,17 +86,15 @@ function validateEmail(email) {
 }
 
 $(document).ready(function () {
-    $("table").data("page", 1);
+    $("#table1").data("page", 1);
+
     const queryParamsString = window.location.search.substr(1);
     if (queryParamsString == "new=true") {
         $("#emailModal").modal("show");
-    } else {
-        getRun(1);
     }
 
     // override checkbox
     $("#emailChecked")[0].checked = $("#emailChecked").attr("checked");
-
 
     $("#email_submit").click(function () {
         const email = $("#exampleInputEmail1").val();
@@ -100,22 +106,48 @@ $(document).ready(function () {
                     window.location.replace("/account");
                 },
                 error: function (xhr, status, error) {
-                    var errorMessage = xhr.status + ": " + xhr.statusText;
-                    alert("Error - " + errorMessage);
+                    console.error(xhr, status, error);
+                    alert("Error - " + xhr.status + ": " + xhr.responseText);
                 },
             });
         }
     });
 
     $("#get").click(function () {
-        const page = $("table").data("page");
-        getRun(page);
+        const page = $("#table1").data("page");
+        getRun(
+            "/api/activities?num=" +
+                document.getElementById("getNumber").value +
+                "&page=" +
+                page,
+            "table1"
+        );
+    });
+
+    $("#activityUrlGet").click(function () {
+        const table = document.getElementById("table2");
+        const urlElement = document.getElementById("activityUrl");
+        const url = urlElement.value;
+        if (table.rows.length > 1) table.deleteRow(1);
+
+        // quick sanity check before sending to back end
+        if (
+            !url.includes("strava.com/activities/") &&
+            !url.includes("strava.app.link/") &&
+            !/^\d{10}$/.test(url)
+        ) {
+            document.getElementById("activityUrlInvalidFeedback").innerText =
+                "Please enter a valid activity ID or URL";
+            urlElement.classList.add("is-invalid");
+            return;
+        }
+        urlElement.classList.remove("is-invalid");
+        getRun("/api/activities?url=" + url, "table2");
     });
 
     $("#updateSettings").click(function () {
         const email = $("#email").val();
         const checkedEmail = $("#emailChecked").is(":checked");
-        console.log(checkedEmail);
         if (validateEmail(email)) {
             $.ajax({
                 url: "/api/email?email=" + email + "&enabled=" + checkedEmail,
@@ -124,8 +156,8 @@ $(document).ready(function () {
                     alert("Updated successfully");
                 },
                 error: function (xhr, status, error) {
-                    var errorMessage = xhr.status + ": " + xhr.statusText;
-                    alert("Error - " + errorMessage);
+                    console.error(xhr, status, error);
+                    alert("Error - " + xhr.status + ": " + xhr.responseText);
                 },
             });
         }

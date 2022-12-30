@@ -28,3 +28,12 @@ body {
 a.btn {
   color: white;
 }
+
+#getNumber {
+  width: 100px;
+  margin-left: 10px;
+}
+
+#get {
+  margin-left: 15px;
+}
