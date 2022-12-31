@@ -32,12 +32,14 @@ async function post(req, res) {
 
     //get run data
     run = await runFetch.getActivityData(body.object_id, returned_access_token);
-    if (run.status != 200)
-        return debug("run get error");
-    run = run.data;
-    if (run.type != "Run" || run.distance <= 5000)
-        return debug("not 5k run");
-    const runData = runFetch.parseRun(run);
+    if (run.status != 200) return debug("run get error");
+    debug(run.data)
+    let runData;
+    try {
+        runData = runFetch.parseRun(run.data);
+    } catch (error) {
+        return debug(error);
+    }
     debug(runData);
 
     let emailText =

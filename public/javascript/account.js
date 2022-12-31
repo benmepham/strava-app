@@ -46,6 +46,8 @@ function getRun(url, table) {
             $(".loader").removeClass("invisible");
         },
         success: function (data) {
+            if (data.runs.length == 0 )
+                alert("No more valid runs")
             if (table == "table1") $("#" + table).data("page", data.page);
             addToTable(data, table);
         },

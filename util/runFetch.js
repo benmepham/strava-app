@@ -1,4 +1,5 @@
 const fetch = require("node-fetch");
+const { validateRun } = require("./validateRun");
 const debug = require("debug")("strava-app:runFetch");
 
 module.exports = { getActivity, getRuns, getActivityData, parseRun };
@@ -31,16 +32,12 @@ async function getRuns(token, page, num) {
             if (getActivity_return.status != 200)
                 return { status: getActivity_return.status };
             let run = getActivity_return.data;
+            if (run.length == 0) break;
             debug(run);
-            if (
-                run[0].type == "Run" &&
-                run[0].distance >= 5000 &&
-                !run[0].manual
-            )
-                runs.push(run[0]);
+            if (validateRun(run[0])) runs.push(run[0]);
             pageIter++;
         }
-        return { runs: runs, page: pageIter, status: 200 };
+        return { runs, page: pageIter, status: 200 };
     } catch (error) {
         debug(error);
         throw "No more valid runs";
@@ -72,7 +69,7 @@ function secondsToString(time) {
 }
 
 function parseRun(run) {
-    if (run.type != "Run") throw "Activity is not a run";
+    if (!validateRun(run)) throw "Activity is invalid";
     try {
         let time10k = "",
             pace10k = "",
