@@ -10,7 +10,6 @@ async function post(req, res) {
     debug("webhook event received!", req.query, req.body);
     res.status(200).send("EVENT_RECEIVED");
     let body = req.body;
-    console.log(body);
 
     if (body["aspect_type"] != "create")
         return debug("ignore webhooks apart from create events");

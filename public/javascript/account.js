@@ -91,7 +91,7 @@ $(document).ready(function () {
     $("#table1").data("page", 1);
 
     const queryParamsString = window.location.search.substr(1);
-    if (queryParamsString == "new=true") {
+    if (queryParamsString == "new") {
         $("#emailModal").modal("show");
     }
 

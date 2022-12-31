@@ -19,7 +19,7 @@ const version_env = process.env.VERSION_ENV;
 
 db.loadDb();
 
-// Version number from GitHub actions
+// version number from GitHub actions
 let version = "dev";
 if (version_env) {
     if (version_env.startsWith("refs/heads/main"))
@@ -32,6 +32,7 @@ console.log("strava-app, env: " + environment + ", version: " + version);
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
+// helmet setup
 app.use(helmet());
 app.use(
     helmet.contentSecurityPolicy({
@@ -60,16 +61,10 @@ if (environment == "production") {
 }
 app.use(session(sessionSetup));
 
+// Passport Setup
 app.use(passport.initialize());
 app.use(passport.session());
 
-// Passport session setup.
-//   To support persistent login sessions, Passport needs to be able to
-//   serialize users into and deserialize users out of the session.  Typically,
-//   this will be as simple as storing the user ID when serializing, and finding
-//   the user by ID when deserializing.  However, since this example does not
-//   have a database of user records, the complete Strava profile is
-//   serialized and deserialized.
 passport.serializeUser(function (user, done) {
     done(null, user);
 });
@@ -144,9 +139,7 @@ app.get("/account", ensureAuthenticated, function (req, res) {
 app.get(
     "/auth/strava",
     passport.authenticate("oauth2", {
-        // scope: ["activity:read_all,activity:read"],
-        scope: ["activity:read"],
-        // approvalPrompt: "auto",
+        scope: ["activity:read_all,activity:read"],
     })
 );
 
@@ -159,18 +152,15 @@ app.get(
     "/auth/strava/callback",
     passport.authenticate("oauth2", { failureRedirect: "/" }),
     function (req, res) {
-        if (req.user.login_count <= 1) {
-            return res.redirect("/account?new=true");
-        }
+        // On first login, show the welcome message
+        if (req.user.login_count <= 1) return res.redirect("/account?new");
         res.redirect("/account");
     }
 );
 
 app.get("/logout", function (req, res, next) {
     req.logout(function (err) {
-        if (err) {
-            return next(err);
-        }
+        if (err) return next(err);
         res.redirect("/");
     });
 });
@@ -179,15 +169,9 @@ app.get("/logout", function (req, res, next) {
 app.post("/webhook", webhook.post);
 app.get("/webhook", webhook.get);
 
-// Simple route middleware to ensure user is authenticated.
-//   Use this route middleware on any resource that needs to be protected.  If
-//   the request is authenticated (typically via a persistent login session),
-//   the request will proceed.  Otherwise, the user will be redirected to the
-//   login page.
+// Simple route middleware to ensure user is authenticatec
 function ensureAuthenticated(req, res, next) {
-    if (req.isAuthenticated()) {
-        return next();
-    }
+    if (req.isAuthenticated()) return next();
     res.redirect("/");
 }
 
