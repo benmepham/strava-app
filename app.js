@@ -4,11 +4,9 @@ const helmet = require("helmet");
 const path = require("path");
 const passport = require("passport");
 const OAuth2Strategy = require("passport-oauth2");
-
 const session = require("express-session");
 const MongoStore = require("connect-mongo");
-
-const debug = require("debug")("strava-app:appjs");
+const debug = require("debug")("strava-app:app");
 
 const api = require("./routes/api");
 const email_api = require("./routes/email_api");
@@ -17,28 +15,22 @@ const db = require("./util/db");
 
 const app = express();
 const environment = app.get("env");
-// debug("NODE_ENV: " + environment);
-console.log(environment);
-console.log(process.env.VERSION_ENV);
-var logger;
-// if (environment == "development") logger = require("morgan");
-// if (environment == "development") app.use(logger("dev"));
-logger = require("morgan");
-app.use(logger("dev"));
+const version_env = process.env.VERSION_ENV;
 
 db.loadDb();
 
 // Version number from GitHub actions
 let version = "dev";
-if (process.env.VERSION_ENV) {
-    if (process.env.VERSION_ENV.startsWith("refs/heads/main"))
-        version = process.env.VERSION_ENV.match(/(?!-)([\w\d]){7}/)[0];
+if (version_env) {
+    if (version_env.startsWith("refs/heads/main"))
+        version = version_env.match(/(?!-)([\w\d]){7}/)[0];
     else
-        version = process.env.VERSION_ENV.substring(
+        version = version_env.substring(
             10,
-            process.env.VERSION_ENV.indexOf("-")
+            version_env.indexOf("-")
         );
 }
+console.log("strava-app, env: " + environment + ", version: " + version);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -188,10 +180,7 @@ app.get("/logout", function (req, res, next) {
 });
 
 // webhooks
-
 app.post("/webhook", webhook.post);
-
-// Adds support for GET requests to our webhook
 app.get("/webhook", webhook.get);
 
 // Simple route middleware to ensure user is authenticated.
@@ -215,8 +204,7 @@ app.use(function (req, res, next) {
 app.use(function (err, req, res, next) {
     // set locals, only providing error in development
     res.locals.message = err.message;
-    res.locals.error = req.app.get("env") === "development" ? err : {};
-
+    res.locals.error = environment === "development" ? err : {};
     // render the error page
     res.status(err.status || 500);
     res.render("error");
