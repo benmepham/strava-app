@@ -3,7 +3,7 @@ const debug = require("debug")("strava-app:db");
 
 let collection;
 
-module.exports = { loadDb, findUser, setEmail, setAlertOption, setToken };
+module.exports = { loadDb, findUser, setEmail, setToken };
 
 function loadDb() {
     const db_url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017?authSource=admin`;
@@ -30,30 +30,14 @@ async function findUser(id) {
     }
 }
 
-async function setEmail(id, email) {
+async function setEmail(id, email, sendEmails) {
     try {
         res = await collection.findOneAndUpdate(
             { id: id },
             {
                 $set: {
-                    email: email,
-                },
-            },
-            { upsert: false, returnDocument: "after" }
-        );
-        return res;
-    } catch (err) {
-        return console.log(err);
-    }
-}
-
-async function setAlertOption(id, bool) {
-    try {
-        res = await collection.findOneAndUpdate(
-            { id: id },
-            {
-                $set: {
-                    sendEmails: String(bool),
+                    email,
+                    sendEmails,
                 },
             },
             { upsert: false, returnDocument: "after" }

@@ -9,9 +9,9 @@ const MongoStore = require("connect-mongo");
 const debug = require("debug")("strava-app:app");
 
 const api = require("./routes/api");
-const email_api = require("./routes/email_api");
 const webhook = require("./routes/webhook");
 const db = require("./util/db");
+const { saveEmailToDb } = require("./routes/email_api");
 
 const app = express();
 const environment = app.get("env");
@@ -24,11 +24,7 @@ let version = "dev";
 if (version_env) {
     if (version_env.startsWith("refs/heads/main"))
         version = version_env.match(/(?!-)([\w\d]){7}/)[0];
-    else
-        version = version_env.substring(
-            10,
-            version_env.indexOf("-")
-        );
+    else version = version_env.substring(10, version_env.indexOf("-"));
 }
 console.log("strava-app, env: " + environment + ", version: " + version);
 
@@ -130,7 +126,7 @@ passport.use(
 
 app.get("/api/activities", ensureAuthenticated, api.view);
 
-app.post("/api/email", email_api.email_db);
+app.post("/api/email", saveEmailToDb);
 
 app.get("/", function (req, res) {
     res.render("index", { user: req.user, version });
