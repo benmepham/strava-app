@@ -12,56 +12,43 @@ async function post(req, res) {
     let body = req.body;
     console.log(body);
 
-    if (body["aspect_type"] == "create") {
-        debug("create activity running");
-        const user = await db.findUser(parseInt(body.owner_id));
+    if (body["aspect_type"] != "create")
+        return debug("ignore webhooks apart from create events");
+    debug("create activity event received");
+    const user = await db.findUser(parseInt(body.owner_id));
 
-        if (!user) {
-            return debug("user does not exist")
-        }
+    if (!user) return debug("user does not exist");
+    if (!user.email) return debug("user has no email");
+    if (!user.sendEmails) return debug("user has emails disabled");
 
-        if (!user.sendEmails) {
-            return debug("user has no email");
-        }
+    // refresh token Checks
+    debug(user);
+    let returned_access_token = await refreshToken.refreshToken(
+        user.id,
+        user.access_token,
+        user.refresh_token,
+        user.expires_at
+    );
 
-        // refresh token Checks
-        debug(user);
-        let returned_access_token = await refreshToken.refreshToken(
-            user.id,
-            user.access_token,
-            user.refresh_token,
-            user.expires_at
-        );
+    //get run data
+    run = await runFetch.getActivityData(body.object_id, returned_access_token);
+    if (run.status != 200)
+        return debug("run get error");
+    run = run.data;
+    if (run.type != "Run" || run.distance <= 5000)
+        return debug("not 5k run");
+    const runData = runFetch.parseRun(run);
+    debug(runData);
 
-        //get run data
-        run = await runFetch.getActivityData(
-            body.object_id,
-            returned_access_token
-        );
-
-        if (run.status != 200) {
-            return debug("run get error");
-        }
-        run = run.data;
-
-        if (run.type != "Run" || run.distance <= 5000) {
-            return debug("not 5k run");
-        }
-        const runData = runFetch.parseRun(run);
-
-        debug(runData);
-
-        let emailText =
-            `Hello ${user.name}\nWell done, you have completed a run, ${runData.name}` +
-            "\n--- Stats: ---\n" +
-            `Date: ${runData.date}\n` +
-            `Distance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\n` +
-            `5K Time: ${runData.time5k}\n5K Pace: ${runData.pace5k}`;
-        if (runData.time10k != "")
-            emailText += `\n10K Time: ${runData.time10k}\n10K Pace: ${runData.pace10k}`;
-        // send email
-        email.sendMail(user.email, runData.name + " Time", emailText, null);
-    }
+    let emailText =
+        `Hello ${user.name}\nWell done, you have uploaded a run, ${runData.name}` +
+        "\n--- Stats: ---\n" +
+        `Date: ${runData.date}\n` +
+        `Distance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\n` +
+        `5K Time: ${runData.time5k}\n5K Pace: ${runData.pace5k}`;
+    if (runData.time10k != "")
+        emailText += `\n10K Time: ${runData.time10k}\n10K Pace: ${runData.pace10k}`;
+    email.sendMail(user.email, runData.name + " Time", emailText, null);
 }
 
 async function get(req, res) {
