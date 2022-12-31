@@ -31,7 +31,12 @@ async function getRuns(token, page, num) {
             if (getActivity_return.status != 200)
                 return { status: getActivity_return.status };
             let run = getActivity_return.data;
-            if (run[0].type == "Run" && run[0].distance >= 5000 && !run[0].manual)
+            debug(run);
+            if (
+                run[0].type == "Run" &&
+                run[0].distance >= 5000 &&
+                !run[0].manual
+            )
                 runs.push(run[0]);
             pageIter++;
         }
@@ -63,13 +68,11 @@ function secondsToString(time) {
     let secs = Math.round(time - mins * 60);
     let ret;
     ret = mins + ":" + (secs < 10 ? "0" : "") + secs;
-    // ret += "" + secs;
     return ret;
 }
 
 function parseRun(run) {
-    if (run.type != 'Run')
-        throw 'Activity is not a run'
+    if (run.type != "Run") throw "Activity is not a run";
     try {
         let time10k = "",
             pace10k = "",
