@@ -25,7 +25,7 @@ async function getActivityList(token, page) {
 
 async function getRuns(token, page, num, pagePos) {
     let dict = {
-        runs,
+        runs: [],
         page: page,
         status: 200,
         pagePos: pagePos,
