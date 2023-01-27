@@ -20,8 +20,7 @@ exports.view = async function (req, res) {
             activityUrl = activityUrl.match(stravaUrlRegex)[0];
         else if (activityUrl.match(stravaShortUrlRegex)) {
             activityUrl =
-                "https://" +
-                activityUrl.match(stravaShortUrlRegex)[0];
+                "https://" + activityUrl.match(stravaShortUrlRegex)[0];
             activityUrl = await parseStravaAppLinkUrl(activityUrl);
             if (!activityUrl)
                 return res.status(400).send("strava.app.link URL is invalid");
@@ -49,10 +48,9 @@ exports.view = async function (req, res) {
             return res.status(400).send(error);
         }
         return res.send({ runs: [runData] });
-    
     }
 
-    // if 
+    // if
     if (req.query.num < 1 || req.query.num > 5 || req.query.page < 1)
         return res
             .status(400)
@@ -62,7 +60,8 @@ exports.view = async function (req, res) {
         let runs = await runFetch.getRuns(
             returned_access_token,
             req.query.page,
-            req.query.num
+            req.query.num,
+            req.query.pagePos
         );
         if (runs.status != 200) return res.status(runs.status).send();
         let runArray = [];
@@ -72,7 +71,7 @@ exports.view = async function (req, res) {
             run = run.data;
             runArray.push(runFetch.parseRun(run));
         }
-        res.send({ runs: runArray, page: runs.page });
+        res.send({ runs: runArray, page: runs.page, pagePos: runs.pagePos });
     } catch (error) {
         debug(error);
         res.status(500).send(error);

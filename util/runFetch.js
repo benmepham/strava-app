@@ -2,13 +2,13 @@ const fetch = require("node-fetch");
 const { validateRun } = require("./validateRun");
 const debug = require("debug")("strava-app:runFetch");
 
-module.exports = { getActivity, getRuns, getActivityData, parseRun };
+module.exports = { getRuns, getActivityData, parseRun };
 
-async function getActivity(token, page) {
+async function getActivityList(token, page) {
     let resp = await fetch(
         "https://www.strava.com/api/v3/athlete/activities?page=" +
             page +
-            "&per_page=1",
+            "&per_page=30",
         {
             headers: { Authorization: "Bearer " + token },
         }
@@ -23,25 +23,31 @@ async function getActivity(token, page) {
     }
 }
 
-async function getRuns(token, page, num) {
-    try {
-        let pageIter = page;
-        let runs = [];
-        while (runs.length != num) {
-            const getActivity_return = await getActivity(token, pageIter);
-            if (getActivity_return.status != 200)
-                return { status: getActivity_return.status };
-            let run = getActivity_return.data;
-            if (run.length == 0) break;
-            debug(run);
-            if (validateRun(run[0])) runs.push(run[0]);
-            pageIter++;
+async function getRuns(token, page, num, pagePos) {
+    let dict = {
+        runs,
+        page: page,
+        status: 200,
+        pagePos: pagePos,
+    };
+    let getActivity_return = await getActivityList(token, dict.page);
+    debug(getActivity_return);
+    while (dict.runs.length != num) {
+        if (dict.pagePos == 29) {
+            dict.page++;
+            getActivity_return = await getActivityList(token, dict.page);
+            dict.pagePos = 0;
+            debug(getActivity_return);
         }
-        return { runs, page: pageIter, status: 200 };
-    } catch (error) {
-        debug(error);
-        throw "No more valid runs";
+        debug(dict.page, dict.pagePos, dict.runs);
+        if (getActivity_return.status != 200)
+            return { status: getActivity_return.status };
+        if (!getActivity_return.data[dict.pagePos]) throw "No more valid runs";
+        if (validateRun(getActivity_return.data[dict.pagePos]))
+            dict.runs.push(getActivity_return.data[dict.pagePos]);
+        dict.pagePos++;
     }
+    return dict;
 }
 
 async function getActivityData(activityId, token) {
