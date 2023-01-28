@@ -55,10 +55,9 @@ async function getActivityData(activityId, token) {
     );
     if (!resp.ok) {
         debug("getActivityData Error:", resp.status);
-        return { status: resp.status };
+        throw "getActivityData Error: " + resp.status;
     } else {
-        const data = await resp.json();
-        return { data: data, status: resp.status };
+        return await resp.json();
     }
 }
 

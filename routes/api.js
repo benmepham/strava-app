@@ -30,19 +30,14 @@ exports.view = async function (req, res) {
         if (!/^\d{10}$/.test(activityUrl))
             return res.status(400).send("Activity ID input is invalid");
 
-        run = await runFetch.getActivityData(
-            activityUrl,
-            returned_access_token
-        );
-
-        if (run.status != 200)
-            return res
-                .status(run.status)
-                .send("Can't find a matching activity in your account");
-
         let runData;
         try {
-            runData = runFetch.parseRun(run.data);
+            runData = runFetch.parseRun(
+                await runFetch.getActivityData(
+                    activityUrl,
+                    returned_access_token
+                )
+            );
         } catch (error) {
             debug(error);
             return res.status(400).send(error);
@@ -65,8 +60,6 @@ exports.view = async function (req, res) {
         let runArray = [];
         for (let run of runs.runs) {
             run = await runFetch.getActivityData(run.id, returned_access_token);
-            if (run.status != 200) return res.status(run.status).send();
-            run = run.data;
             runArray.push(runFetch.parseRun(run));
         }
         res.send({ runs: runArray, page: runs.page, pagePos: runs.pagePos });

@@ -30,12 +30,14 @@ async function post(req, res) {
     );
 
     //get run data
-    run = await runFetch.getActivityData(body.object_id, returned_access_token);
-    if (run.status != 200) return debug("run get error");
-    debug(run.data)
     let runData;
     try {
-        runData = runFetch.parseRun(run.data);
+        runData = runFetch.parseRun(
+            await runFetch.getActivityData(
+                body.object_id,
+                returned_access_token
+            )
+        );
     } catch (error) {
         return debug(error);
     }
