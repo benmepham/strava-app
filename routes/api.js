@@ -50,7 +50,6 @@ exports.view = async function (req, res) {
         return res.send({ runs: [runData] });
     }
 
-    // if
     if (req.query.num < 1 || req.query.num > 5 || req.query.page < 1)
         return res
             .status(400)
@@ -63,7 +62,6 @@ exports.view = async function (req, res) {
             req.query.num,
             req.query.pagePos
         );
-        if (runs.status != 200) return res.status(runs.status).send();
         let runArray = [];
         for (let run of runs.runs) {
             run = await runFetch.getActivityData(run.id, returned_access_token);

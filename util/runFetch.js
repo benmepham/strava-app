@@ -13,41 +13,37 @@ async function getActivityList(token, page) {
             headers: { Authorization: "Bearer " + token },
         }
     );
-
     if (!resp.ok) {
         debug("getActivity Error:", resp.status);
-        return { status: resp.status };
+        throw "Error getting activities list: " + resp.status;
     } else {
-        const data = await resp.json();
-        return { data: data, status: resp.status };
+        return await resp.json();
     }
 }
 
 async function getRuns(token, page, num, pagePos) {
-    let dict = {
+    let dataToReturn = {
         runs: [],
         page: page,
         status: 200,
         pagePos: pagePos,
     };
-    let getActivity_return = await getActivityList(token, dict.page);
-    debug(getActivity_return);
-    while (dict.runs.length != num) {
-        if (dict.pagePos == 29) {
-            dict.page++;
-            getActivity_return = await getActivityList(token, dict.page);
-            dict.pagePos = 0;
-            debug(getActivity_return);
+    let activities = await getActivityList(token, dataToReturn.page);
+    debug(activities);
+    while (dataToReturn.runs.length != num) {
+        if (dataToReturn.pagePos == 29) {
+            dataToReturn.page++;
+            activities = await getActivityList(token, dataToReturn.page);
+            dataToReturn.pagePos = 0;
+            debug(activities);
         }
-        debug(dict.page, dict.pagePos, dict.runs);
-        if (getActivity_return.status != 200)
-            return { status: getActivity_return.status };
-        if (!getActivity_return.data[dict.pagePos]) throw "No more valid runs";
-        if (validateRun(getActivity_return.data[dict.pagePos]))
-            dict.runs.push(getActivity_return.data[dict.pagePos]);
-        dict.pagePos++;
+        debug(dataToReturn.page, dataToReturn.pagePos, dataToReturn.runs);
+        if (!activities[dataToReturn.pagePos]) throw "Not enough valid runs";
+        if (validateRun(activities[dataToReturn.pagePos]))
+            dataToReturn.runs.push(activities[dataToReturn.pagePos]);
+        dataToReturn.pagePos++;
     }
-    return dict;
+    return dataToReturn;
 }
 
 async function getActivityData(activityId, token) {
