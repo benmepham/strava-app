@@ -72,21 +72,18 @@ function secondsToString(time) {
 function parseRun(run) {
     if (!validateRun(run)) throw "Activity is invalid";
     try {
-        let time10k = "",
-            pace10k = "",
-            time5k = secondsToString(run.best_efforts[5].moving_time);
-        if (run.best_efforts[6]) {
-            time10k = secondsToString(run.best_efforts[6].moving_time);
-            pace10k = secondsToString(run.best_efforts[6].moving_time / 10);
-        }
         return {
             name: run.name,
             date: run.start_date.slice(0, 10),
-            time5k,
+            time5k: secondsToString(run.best_efforts[5].moving_time),
             pace5k: secondsToString(run.best_efforts[5].moving_time / 5),
             id: run.id,
-            time10k,
-            pace10k,
+            time10k: run.best_efforts[6]
+                ? secondsToString(run.best_efforts[6].moving_time)
+                : "",
+            pace10k: run.best_efforts[6]
+                ? secondsToString(run.best_efforts[6].moving_time / 10)
+                : "",
             distance: (run.distance / 1000).toFixed(2).toString() + " km",
             timeMoving: secondsToString(run["moving_time"]),
         };
