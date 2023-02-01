@@ -12,6 +12,7 @@ const api = require("./routes/api");
 const webhook = require("./routes/webhook");
 const db = require("./util/db");
 const { saveEmailToDb } = require("./routes/email_api");
+const { deleteAccount } = require("./routes/delete");
 
 const app = express();
 const environment = app.get("env");
@@ -119,9 +120,11 @@ passport.use(
     )
 );
 
-app.get("/api/activities", ensureAuthenticated, api.view);
+app.get("/api/activities", ensureAuthenticatedApi, api.view);
 
-app.post("/api/email", saveEmailToDb);
+app.post("/api/email", ensureAuthenticatedApi, saveEmailToDb);
+
+app.delete("/api/delete", ensureAuthenticatedApi, deleteAccount);
 
 app.get("/", function (req, res) {
     res.render("index", { user: req.user, version });
@@ -173,6 +176,11 @@ app.get("/webhook", webhook.get);
 function ensureAuthenticated(req, res, next) {
     if (req.isAuthenticated()) return next();
     res.redirect("/");
+}
+
+function ensureAuthenticatedApi(req, res, next) {
+    if (req.isAuthenticated()) return next();
+    res.status(403).send();
 }
 
 // catch 404 and forward to error handler

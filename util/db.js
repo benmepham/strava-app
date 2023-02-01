@@ -3,7 +3,7 @@ const debug = require("debug")("strava-app:db");
 
 let collection;
 
-module.exports = { loadDb, findUser, setEmail, setToken };
+module.exports = { loadDb, findUser, setEmail, setToken, deleteUser };
 
 function loadDb() {
     const db_url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017?authSource=admin`;
@@ -66,4 +66,10 @@ async function setToken(id, time, refresh, access) {
     } catch (err) {
         return console.log(err);
     }
+}
+
+async function deleteUser(id) {
+    const res = await collection.deleteOne({ id: id });
+    if (res.acknowledged && res.deletedCount == 1) return true;
+    return false;
 }
