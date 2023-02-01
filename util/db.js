@@ -69,6 +69,7 @@ async function setToken(id, time, refresh, access) {
 }
 
 async function deleteUser(id) {
+    debug("deleting account", id);
     const res = await collection.deleteOne({ id: id });
     if (res.acknowledged && res.deletedCount == 1) return true;
     return false;
