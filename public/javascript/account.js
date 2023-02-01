@@ -20,6 +20,9 @@ function addToTable(data, table) {
             run.timeMoving +
             "</td>" +
             "<td>" +
+            run.paceMoving +
+            "</td>" +
+            "<td>" +
             run.time5k +
             "</td>" +
             "<td>" +
