@@ -45,7 +45,7 @@ exports.view = async function (req, res) {
         return res.send({ runs: [runData] });
     }
 
-    if (req.query.num < 1 || req.query.num > 5 || req.query.page < 1)
+    if (req.query.num < 1 || req.query.num > 20 || req.query.page < 1)
         return res
             .status(400)
             .send("invalid number of activites or page number");
