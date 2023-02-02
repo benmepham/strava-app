@@ -10,15 +10,15 @@ const debug = require("debug")("strava-app:app");
 
 const api = require("./routes/api");
 const webhook = require("./routes/webhook");
-const db = require("./util/db");
 const { saveEmailToDb } = require("./routes/email_api");
 const { deleteAccount } = require("./routes/delete");
+const { loadDb, deserializeUserQuery, newUserQuery } = require("./util/db");
 
 const app = express();
 const environment = app.get("env");
 const version_env = process.env.VERSION_ENV;
 
-db.loadDb();
+loadDb();
 
 // version number from GitHub actions
 let version = "dev";
@@ -71,9 +71,7 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (obj, done) {
-    collection.findOne({ id: obj.id }, (err, doc) => {
-        done(null, doc);
-    });
+    deserializeUserQuery(obj.id, done);
 });
 
 passport.use(
@@ -88,33 +86,7 @@ passport.use(
         function (accessToken, refreshToken, params, profile, done) {
             // asynchronous verification, for effect...
             process.nextTick(function () {
-                collection.findOneAndUpdate(
-                    { id: params.athlete.id },
-                    {
-                        $setOnInsert: {
-                            id: params.athlete.id,
-                            name:
-                                params.athlete.firstname +
-                                " " +
-                                params.athlete.lastname,
-                            photo: params.athlete.profile,
-                            created_on: new Date(),
-                            sendEmails: false,
-                        },
-                        $set: {
-                            last_login: new Date(),
-                            access_token: accessToken,
-                            refresh_token: refreshToken,
-                            expires_at: params.expires_at,
-                        },
-                        $inc: { login_count: 1 },
-                    },
-                    { upsert: true, returnDocument: "after" },
-                    (err, doc) => {
-                        if (err) return console.error(err);
-                        return done(null, doc.value);
-                    }
-                );
+                newUserQuery(params, done, accessToken, refreshToken);
             });
         }
     )

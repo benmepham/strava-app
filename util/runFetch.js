@@ -86,6 +86,9 @@ function parseRun(run) {
                 : "",
             distance: (run.distance / 1000).toFixed(2).toString() + " km",
             timeMoving: secondsToString(run["moving_time"]),
+            paceMoving: secondsToString(
+                run["moving_time"] / (run.distance / 1000)
+            ),
         };
     } catch (error) {
         debug(error);

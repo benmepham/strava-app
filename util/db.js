@@ -3,7 +3,15 @@ const debug = require("debug")("strava-app:db");
 
 let collection;
 
-module.exports = { loadDb, findUser, setEmail, setToken, deleteUser };
+module.exports = {
+    loadDb,
+    findUser,
+    setEmail,
+    setToken,
+    deserializeUserQuery,
+    newUserQuery,
+    deleteUser
+};
 
 function loadDb() {
     const db_url = `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017?authSource=admin`;
@@ -11,14 +19,13 @@ function loadDb() {
         useNewUrlParser: true,
         useUnifiedTopology: true,
     });
-    client.connect((err) => {
-        if (err) return console.error(err);
+    try {
+        client.connect();
         collection = client.db(process.env.MONGO_DB).collection("users");
         debug("DB Connected");
-        // perform actions on the collection object
-        // client.close();
-        global.collection = collection;
-    });
+    } catch (err) {
+        debug(err);
+    }
 }
 
 async function findUser(id) {
@@ -73,4 +80,38 @@ async function deleteUser(id) {
     const res = await collection.deleteOne({ id: id });
     if (res.acknowledged && res.deletedCount == 1) return true;
     return false;
+
+function deserializeUserQuery(id, done) {
+    collection.findOne({ id: id }, (err, doc) => {
+        if (err) return debug(err);
+        done(null, doc);
+    });
+}
+
+function newUserQuery(params, done, accessToken, refreshToken) {
+    collection.findOneAndUpdate(
+        { id: params.athlete.id },
+        {
+            $setOnInsert: {
+                id: params.athlete.id,
+                name: params.athlete.firstname + " " + params.athlete.lastname,
+                photo: params.athlete.profile,
+                created_on: new Date(),
+                sendEmails: false,
+            },
+            $set: {
+                last_login: new Date(),
+                access_token: accessToken,
+                refresh_token: refreshToken,
+                expires_at: params.expires_at,
+            },
+            $inc: { login_count: 1 },
+        },
+        { upsert: true, returnDocument: "after" },
+        (err, doc) => {
+            if (err) return debug(err);
+            return done(null, doc.value);
+        }
+    );
+
 }
