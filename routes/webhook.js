@@ -47,8 +47,9 @@ async function post(req, res) {
         `Hello ${user.name}\nWell done, you have uploaded a run, ${runData.name}` +
         "\n--- Stats: ---\n" +
         `Date: ${runData.date}\n` +
-        `Distance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\n` +
-        `5K Time: ${runData.time5k}\n5K Pace: ${runData.pace5k}`;
+        `Distance: ${runData.distance}\nMoving Time: ${runData.timeMoving}\nMoving Pace: ${runData.paceMoving}\n` +
+        `5K Time: ${runData.time5k}\n5K Pace: ${runData.pace5k}\n` +
+        "Unsubscribe on your account page";
     if (runData.time10k != "")
         emailText += `\n10K Time: ${runData.time10k}\n10K Pace: ${runData.pace10k}`;
     email.sendMail(user.email, runData.name + " Time", emailText, null);
