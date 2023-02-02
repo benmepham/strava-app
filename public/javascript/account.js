@@ -121,6 +121,10 @@ $(document).ready(function () {
         }
     });
 
+    $("#emailModalClose").click(function () {
+        window.location.replace("/account");
+    });
+
     $("#get").click(function () {
         const page = $("#table1").data("page");
         const pagePos = $("#table1").data("pagePos");
@@ -173,5 +177,20 @@ $(document).ready(function () {
                 },
             });
         }
+    });
+
+    $("#deleteAccount").click(function () {
+        $.ajax({
+            url: "/api/delete",
+            type: "delete",
+            success: function () {
+                alert("Account deleted");
+                window.location.href = "/";
+            },
+            error: function (xhr, status, error) {
+                console.error(xhr, status, error);
+                alert("Error - " + xhr.status + ": " + xhr.responseText);
+            },
+        });
     });
 });

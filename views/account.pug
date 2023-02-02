@@ -60,7 +60,7 @@ block content
 
     .container-sm.settings
       h2.mt-4 Settings
-      form
+      form.mb-4
         .form-group
           label(for='email') Email:
           input#email.form-control(type='email' value=user.email name='email')
@@ -69,6 +69,7 @@ block content
             input#emailChecked(type='checkbox' checked=user.sendEmails)
             |  Enable emails
         a.btn.btn-primary#updateSettings Update
+      button.btn.btn-danger#deleteAccount Delete Account
 
   // Modal
   #errorModal.modal.fade(tabindex='-1' role='dialog' aria-hidden='true')
@@ -90,7 +91,7 @@ block content
         .modal-content
           .modal-header
             h5#emailModalLabel.modal-title Welcome to the Strava App
-            button.close(type='button' data-dismiss='modal' aria-label='Close')
+            button.close#emailModalClose(type='button' data-dismiss='modal' aria-label='Close')
               span(aria-hidden='true') &times;
           .modal-body
             | If you would like to receive an email each time you complete a run, please enter your email address below:
@@ -102,7 +103,7 @@ block content
                 input#exampleInputEmail1.form-control(type='email' aria-describedby='emailHelp' placeholder='Enter email')
                 small#emailHelp.form-text.text-muted We&apos;ll never share your email with anyone else.
           .modal-footer
-            button.btn.btn-secondary(type='button' data-dismiss='modal') Close
+            button.btn.btn-secondary#emailModalClose(type='button' data-dismiss='modal') Close
             button.btn.btn-primary#email_submit(type='button') Sign up to emails
 
   script(src='/javascript/account.js')
