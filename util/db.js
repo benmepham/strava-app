@@ -10,7 +10,7 @@ module.exports = {
     setToken,
     deserializeUserQuery,
     newUserQuery,
-    deleteUser
+    deleteUser,
 };
 
 function loadDb() {
@@ -80,6 +80,7 @@ async function deleteUser(id) {
     const res = await collection.deleteOne({ id: id });
     if (res.acknowledged && res.deletedCount == 1) return true;
     return false;
+}
 
 function deserializeUserQuery(id, done) {
     collection.findOne({ id: id }, (err, doc) => {
@@ -113,5 +114,4 @@ function newUserQuery(params, done, accessToken, refreshToken) {
             return done(null, doc.value);
         }
     );
-
 }
