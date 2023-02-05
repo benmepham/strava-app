@@ -230,13 +230,20 @@ $(document).ready(function () {
         $.ajax({
             url: "/api/merge?url1=" + url1 + "&url2=" + url2,
             type: "post",
+            beforeSend: function () {
+                $(".loader").removeClass("invisible");
+            },
             success: function (data) {
-                alert(data);
-                console.log(data);
+                document.getElementById(
+                    "mergeFeedback"
+                ).innerHTML = `Success: <a href="https://strava.com/activities/${data}">View activity</a>`;
             },
             error: function (xhr, status, error) {
-                console.error(xhr, status, error);
-                alert("Error - " + xhr.status + ": " + xhr.responseText);
+                document.getElementById("mergeFeedback").innerText =
+                    "Error - " + xhr.status + ": " + xhr.responseText;
+            },
+            complete: function () {
+                $(".loader").addClass("invisible");
             },
         });
     });
