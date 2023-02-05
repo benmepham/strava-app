@@ -1,25 +1,31 @@
 # Strava-App
 
-View statistics on your Strava runs. Uses webhooks to send an email when a run is uploaded.
-
 Available at: [strava.bjm.me.uk](https://strava.bjm.me.uk)
 
-## Development Setup
+## Features
+
+- Fetch either your most recent runs or a specific run and view statistics (5k/10k time and pace etc.)
+- Receive an email when a new run is uploaded including statistics.
+- Merge two consecutive activities into one (note: start time is changed by 1 min. otherwise Strava detects as duplicate.)
+
+## Setup
+
+### Development Setup
 
 - Setup a Strava API Application [here](https://www.strava.com/settings/api)
 - Copy `sample.env` to `.env` and change values
 - `docker-compose -f docker-compose-dev.yml up -d` to start the DB
 - `npm ci` to install packages
-- `node run devstart` to start the server: [localhost:3000](http://localhost:3000)
+- `npm run start:dev` to start the server: [localhost:3000](http://localhost:3000)
 
-## Production Setup
+### Production Setup
 
 - Setup a Strava API Application [here](https://www.strava.com/settings/api)
 - Copy `sample.env` to `.env` and change values
 - `docker-compose up -d` to start the DB and server
 - Access the server: [localhost:3000](http://localhost:3000)
 
-## Webhook Setup
+### Webhook Setup
 
 - Make POST request to
 
