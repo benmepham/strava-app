@@ -5,7 +5,7 @@ const { StravaBuilder, buildGPX } = require("gpx-builder");
 const { getActivityData } = require("../util/runFetch");
 const { Point, Metadata } = StravaBuilder.MODELS;
 
-async function getData(id, token, key) {
+async function getActivityStreams(id, token, key) {
     let resp = await fetch(
         "https://www.strava.com/api/v3/activities/" +
             id +
@@ -17,11 +17,17 @@ async function getData(id, token, key) {
         }
     );
     if (!resp.ok) {
-        debug("getData Error:", resp.status);
-        throw "Error deauthorizing account: " + resp.status;
+        debug("getActivityStreams Error:", resp.status);
+        throw "Error getting activity streams: " + resp.status;
         // can't throw here
     } else {
-        return resp.json();
+        const data = await resp.json();
+        return {
+            latlong: data[0].data,
+            distance: data[1].data,
+            altitude: data[2].data,
+            time: data[3].data,
+        };
     }
 }
 
@@ -31,33 +37,26 @@ async function getUpoadStatus(id, token) {
         headers: { Authorization: "Bearer " + token },
     });
     if (!resp.ok) {
-        debug("getData Error:", resp.status);
-        throw "Error deauthorizing account: " + resp.status;
-        // can't throw here
+        debug("getUpoadStatus Error:", resp.status);
+        return resp.json();
     } else {
         return resp.json();
     }
 }
 
 async function uploadActivity(formData, token) {
-    try {
-        let resp = await fetch(`https://www.strava.com/api/v3/uploads`, {
-            method: "post",
-            headers: {
-                Authorization: "Bearer " + token,
-            },
-            body: formData,
-        });
-        if (!resp.ok) {
-            debug(await resp.json());
-
-            debug("getData Error:", resp.status);
-            throw "Error account: " + resp.status;
-        } else {
-            return resp.json();
-        }
-    } catch (err) {
-        debug(err);
+    let resp = await fetch(`https://www.strava.com/api/v3/uploads`, {
+        method: "post",
+        headers: {
+            Authorization: "Bearer " + token,
+        },
+        body: formData,
+    });
+    if (!resp.ok) {
+        debug("uploadActivity Error:", resp.status);
+        return resp.json();
+    } else {
+        return resp.json();
     }
 }
 
@@ -67,60 +66,79 @@ function delay(milliseconds) {
     });
 }
 
-async function mergeActivies(req, res) {
-    console.log(req.user.access_token);
-    let activity = req.query.id;
-    let data = await getActivityData(activity, req.user.access_token);
-    let latlong = await getData(activity, req.user.access_token, "latlng");
-    let time_list = await getData(activity, req.user.access_token, "time");
-    let altitude = await getData(activity, req.user.access_token, "altitude");
-    // console.log(latlong);
-    // console.log(time_list);
-    // console.log(altitude);
-    // console.log(data);
-    const dataParsed = {
-        start_date: data.start_date,
-        start_data_local: data.start_date_local,
-        name: data.name,
-        start_latlng: data.start_latlng,
-        end_latlng: data.end_latlng,
-        external_id: data.external_id,
-        moving_time: data.moving_time,
-        elapsed_time: data.elapsed_time,
-        distance: data.distance,
-    };
-    console.log(dataParsed);
-    latlong = latlong[0].data;
-    time_list = time_list[1].data;
-    console.log(time_list[time_list.length - 1]);
-    altitude = altitude[1].data;
+function genGpx(activityStreams, activityData) {
     const points = [];
-
-    let currentDate = new Date();
-    for (let i = 0; i < latlong.length; i++) {
-        currentDate = new Date(dataParsed.start_date);
-        // currentDate.setHours(currentDate.getHours() - 4);
-        currentDate.setSeconds(currentDate.getSeconds() + time_list[i]);
+    let date;
+    for (let i = 0; i < activityStreams.latlong.length; i++) {
+        date = new Date(activityData.start_date);
+        // Hack to get strava not to flag as duplicate
+        date.setSeconds(date.getSeconds() + 60);
+        date.setSeconds(date.getSeconds() + activityStreams.time[i]);
         points.push(
-            new Point(latlong[i][0], latlong[i][1], {
-                ele: altitude[i],
-                time: currentDate,
-            })
+            new Point(
+                activityStreams.latlong[i][0],
+                activityStreams.latlong[i][1],
+                {
+                    ele: activityStreams.altitude[i],
+                    time: date,
+                    // distance: activity1Streams.distance[i],
+                }
+            )
         );
     }
-    console.log(points[0]);
+    return points;
+}
+
+async function mergeActivies(req, res) {
+    // todo: use parser
+    const activity1 = req.query.url1,
+        activity2 = req.query.url2;
+
+    const activity1Data = await getActivityData(
+        activity1,
+        req.user.access_token
+    );
+    const activity2Data = await getActivityData(
+        activity2,
+        req.user.access_token
+    );
+    if (new Date(activity2Data.start_date) < new Date(activity1Data.start_date))
+        return res.status(400).send("wrong activity order");
+
+    // todo: handle if activity times/locations overlap
+
+    const activity1Streams = await getActivityStreams(
+        activity1,
+        req.user.access_token,
+        "altitude,latlng,time"
+    );
+    const activity2Streams = await getActivityStreams(
+        activity2,
+        req.user.access_token,
+        "altitude,latlng,time"
+    );
+
+    const points = genGpx(activity1Streams, activity1Data);
+    points.push(...genGpx(activity2Streams, activity2Data));
+
+    // debug(points[0]);
+
+    // debug(points[points.length - 1]);
 
     const gpxData = new StravaBuilder();
-    // const metadata = new Metadata();
-    // gpxData.setMetadata(metadata);
     gpxData.setSegmentPoints(points);
-    console.log(buildGPX(gpxData.toObject()).slice(0, 1000));
-    console.log(buildGPX(gpxData.toObject()).slice(-1000));
 
-    var formData = new FormData();
-    formData.append("file", buildGPX(gpxData.toObject()), "name.gpx");
+    const formData = new FormData();
+    formData.append(
+        "file",
+        buildGPX(gpxData.toObject()),
+        `${activity1Data.name}-${activity2Data.name}-merge.gpx`
+    );
     formData.append("data_type", "gpx");
-    formData.append("name", "activity1 + activity2 merge");
+    formData.append(
+        "name",
+        `${activity1Data.name} + ${activity2Data.name} merge`
+    );
     formData.append("description", "Merged using strava-app");
     formData.append("sport_type", "Run");
 
@@ -128,7 +146,10 @@ async function mergeActivies(req, res) {
         formData,
         req.user.access_token
     );
+    debug(activityUploadStatus);
+
     while (
+        activityUploadStatus &&
         activityUploadStatus.status == "Your activity is still being processed."
     ) {
         await delay(1000);
@@ -136,10 +157,22 @@ async function mergeActivies(req, res) {
             activityUploadStatus.id,
             req.user.access_token
         );
-        console.log(activityUploadStatus);
+        debug(activityUploadStatus);
     }
 
-    res.status(200).send();
+    if (
+        !activityUploadStatus ||
+        activityUploadStatus.status != "Your activity is ready."
+    )
+        return res
+            .status(500)
+            .send(
+                activityUploadStatus
+                    ? activityUploadStatus.error
+                    : "upload error"
+            );
+
+    return res.status(200).send(activityUploadStatus.activity_id.toString());
 }
 
 module.exports = { mergeActivies };

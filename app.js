@@ -99,7 +99,7 @@ app.post("/api/email", ensureAuthenticatedApi, saveEmailToDb);
 
 app.delete("/api/delete", ensureAuthenticatedApi, deleteAccount);
 
-app.get("/api/merge", ensureAuthenticatedApi, mergeActivies);
+app.post("/api/merge", ensureAuthenticatedApi, mergeActivies);
 
 app.get("/", function (req, res) {
     res.render("index", { user: req.user, version });
