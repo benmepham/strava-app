@@ -3,6 +3,7 @@ var FormData = require("form-data");
 const debug = require("debug")("strava-app:merge_api");
 const { StravaBuilder, buildGPX } = require("gpx-builder");
 const { getActivityData } = require("../util/runFetch");
+const { parseStravaUrl } = require("../util/parseStravaUrl");
 const { Point, Metadata } = StravaBuilder.MODELS;
 
 async function getActivityStreams(id, token, key) {
@@ -90,18 +91,26 @@ function genGpx(activityStreams, activityData) {
 }
 
 async function mergeActivies(req, res) {
-    // todo: use parser
-    const activity1 = req.query.url1,
-        activity2 = req.query.url2;
+    let activity1, activity2;
 
-    const activity1Data = await getActivityData(
-        activity1,
-        req.user.access_token
-    );
-    const activity2Data = await getActivityData(
-        activity2,
-        req.user.access_token
-    );
+    try {
+        activity1 = await parseStravaUrl(req.query.url1);
+        activity2 = await parseStravaUrl(req.query.url2);
+    } catch (err) {
+        debug(err);
+        return res.status(400).send("Activity URL invalid");
+    }
+    debug(activity1, activity2);
+
+    let activity1Data, activity2Data;
+    try {
+        activity1Data = await getActivityData(activity1, req.user.access_token);
+        activity2Data = await getActivityData(activity2, req.user.access_token);
+    } catch (err) {
+        debug(err);
+        return res.status(500).send("Unable to fetch activities");
+    }
+
     if (new Date(activity2Data.start_date) < new Date(activity1Data.start_date))
         return res.status(400).send("wrong activity order");
 

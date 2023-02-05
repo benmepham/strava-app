@@ -1,4 +1,4 @@
-const { parseStravaAppLinkUrl } = require("../util/parseStravaAppLinkUrl");
+const { parseStravaUrl } = require("../util/parseStravaUrl");
 const refreshToken = require("../util/refreshToken");
 const runFetch = require("../util/runFetch");
 const debug = require("debug")("strava-app:api");
@@ -14,21 +14,12 @@ exports.view = async function (req, res) {
 
     let activityUrl = req.query.url;
     if (activityUrl) {
-        const stravaUrlRegex = /(?!strava.com\/activities\/)([0-9]){10}/;
-        const stravaShortUrlRegex = /strava.app.link\/[0-9a-zA-Z]{11}/;
-        if (activityUrl.match(stravaUrlRegex))
-            activityUrl = activityUrl.match(stravaUrlRegex)[0];
-        else if (activityUrl.match(stravaShortUrlRegex)) {
-            activityUrl =
-                "https://" + activityUrl.match(stravaShortUrlRegex)[0];
-            activityUrl = await parseStravaAppLinkUrl(activityUrl);
-            if (!activityUrl)
-                return res.status(400).send("strava.app.link URL is invalid");
+        try {
+            activityUrl = await parseStravaUrl(activityUrl);
+        } catch (error) {
+            debug(error);
+            return res.status(400).send("Activity URL invalid");
         }
-        debug(activityUrl);
-
-        if (!/^\d{10}$/.test(activityUrl))
-            return res.status(400).send("Activity ID input is invalid");
 
         let runData;
         try {
