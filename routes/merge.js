@@ -100,7 +100,6 @@ async function mergeActivies(req, res) {
         debug(err);
         return res.status(400).send("Activity URL invalid");
     }
-    debug(activity1, activity2);
 
     let activity1Data, activity2Data;
     try {
@@ -116,22 +115,28 @@ async function mergeActivies(req, res) {
 
     // todo: handle if activity times/locations overlap
 
-    const activity1Streams = await getActivityStreams(
-        activity1,
-        req.user.access_token,
-        "altitude,latlng,time"
-    );
-    const activity2Streams = await getActivityStreams(
-        activity2,
-        req.user.access_token,
-        "altitude,latlng,time"
-    );
+    let activity1Streams, activity2Streams;
+
+    try {
+        activity1Streams = await getActivityStreams(
+            activity1,
+            req.user.access_token,
+            "altitude,latlng,time"
+        );
+        activity2Streams = await getActivityStreams(
+            activity2,
+            req.user.access_token,
+            "altitude,latlng,time"
+        );
+    } catch (err) {
+        debug(err);
+        return res.status(500).send("Unable to fetch activity streams");
+    }
 
     const points = genGpx(activity1Streams, activity1Data);
     points.push(...genGpx(activity2Streams, activity2Data));
 
     // debug(points[0]);
-
     // debug(points[points.length - 1]);
 
     const gpxData = new StravaBuilder();
@@ -151,22 +156,34 @@ async function mergeActivies(req, res) {
     formData.append("description", "Merged using strava-app");
     formData.append("sport_type", "Run");
 
-    let activityUploadStatus = await uploadActivity(
-        formData,
-        req.user.access_token
-    );
-    debug(activityUploadStatus);
+    let activityUploadStatus;
+
+    try {
+        activityUploadStatus = await uploadActivity(
+            formData,
+            req.user.access_token
+        );
+        debug(activityUploadStatus);
+    } catch (err) {
+        debug(err);
+        return res.status(500).send("Error uploading merged activity");
+    }
 
     while (
         activityUploadStatus &&
         activityUploadStatus.status == "Your activity is still being processed."
     ) {
         await delay(1000);
-        activityUploadStatus = await getUpoadStatus(
-            activityUploadStatus.id,
-            req.user.access_token
-        );
-        debug(activityUploadStatus);
+        try {
+            activityUploadStatus = await getUpoadStatus(
+                activityUploadStatus.id,
+                req.user.access_token
+            );
+            debug(activityUploadStatus);
+        } catch (err) {
+            debug(err);
+            return res.status(500).send("Error uploading merged activity");
+        }
     }
 
     if (

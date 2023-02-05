@@ -236,7 +236,7 @@ $(document).ready(function () {
             success: function (data) {
                 document.getElementById(
                     "mergeFeedback"
-                ).innerHTML = `Success: <a href="https://strava.com/activities/${data}">View activity</a>`;
+                ).innerHTML = `Success: <a href="https://strava.com/activities/${data}" target="_blank">View activity</a>`;
             },
             error: function (xhr, status, error) {
                 document.getElementById("mergeFeedback").innerText =
