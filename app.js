@@ -13,6 +13,7 @@ const webhook = require("./routes/webhook");
 const { saveEmailToDb } = require("./routes/email_api");
 const { deleteAccount } = require("./routes/delete");
 const { loadDb, deserializeUserQuery, newUserQuery } = require("./util/db");
+const { mergeActivies } = require("./routes/merge");
 
 const app = express();
 const environment = app.get("env");
@@ -98,6 +99,8 @@ app.post("/api/email", ensureAuthenticatedApi, saveEmailToDb);
 
 app.delete("/api/delete", ensureAuthenticatedApi, deleteAccount);
 
+app.post("/api/merge", ensureAuthenticatedApi, mergeActivies);
+
 app.get("/", function (req, res) {
     res.render("index", { user: req.user, version });
 });
@@ -114,7 +117,7 @@ app.get("/account", ensureAuthenticated, function (req, res) {
 app.get(
     "/auth/strava",
     passport.authenticate("oauth2", {
-        scope: ["activity:read_all,activity:read"],
+        scope: ["activity:read_all,activity:read,activity:write"],
     })
 );
 

@@ -33,7 +33,7 @@ async function findUser(id) {
         res = await collection.findOne({ id: id });
         return res;
     } catch (err) {
-        return console.log(err);
+        return debug(err);
     }
 }
 
@@ -51,7 +51,7 @@ async function setEmail(id, email, sendEmails) {
         );
         return res;
     } catch (err) {
-        return console.log(err);
+        return debug(err);
     }
 }
 
@@ -71,7 +71,7 @@ async function setToken(id, time, refresh, access) {
         console.log("db done" + res.value.access_token);
         return res;
     } catch (err) {
-        return console.log(err);
+        return debug(err);
     }
 }
 

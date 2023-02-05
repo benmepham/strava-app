@@ -193,4 +193,58 @@ $(document).ready(function () {
             },
         });
     });
+
+    $("#submitMerge").click(function () {
+        const urlElement1 = document.getElementById("mergeUrl1");
+        const url1 = urlElement1.value;
+        const urlElement2 = document.getElementById("mergeUrl2");
+        const url2 = urlElement2.value;
+
+        // quick sanity check before sending to back end
+        if (
+            !url1.includes("strava.com/activities/") &&
+            !url1.includes("strava.app.link/") &&
+            !/^\d{10}$/.test(url1)
+        ) {
+            document.getElementById("mergeUrl1InvalidFeedback").innerText =
+                "Please enter a valid activity ID or URL";
+            urlElement1.classList.add("is-invalid");
+            return;
+        }
+
+        // quick sanity check before sending to back end
+        if (
+            !url2.includes("strava.com/activities/") &&
+            !url2.includes("strava.app.link/") &&
+            !/^\d{10}$/.test(url2)
+        ) {
+            document.getElementById("mergeUrl2InvalidFeedback").innerText =
+                "Please enter a valid activity ID or URL";
+            urlElement2.classList.add("is-invalid");
+            return;
+        }
+
+        urlElement1.classList.remove("is-invalid");
+        urlElement2.classList.remove("is-invalid");
+
+        $.ajax({
+            url: "/api/merge?url1=" + url1 + "&url2=" + url2,
+            type: "post",
+            beforeSend: function () {
+                $(".loader").removeClass("invisible");
+            },
+            success: function (data) {
+                document.getElementById(
+                    "mergeFeedback"
+                ).innerHTML = `Success: <a href="https://strava.com/activities/${data}" target="_blank">View activity</a>`;
+            },
+            error: function (xhr, status, error) {
+                document.getElementById("mergeFeedback").innerText =
+                    "Error - " + xhr.status + ": " + xhr.responseText;
+            },
+            complete: function () {
+                $(".loader").addClass("invisible");
+            },
+        });
+    });
 });
