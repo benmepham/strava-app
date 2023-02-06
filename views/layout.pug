@@ -13,6 +13,12 @@ html(lang='en')
     title Strava App
   body
     block content
-  footer.container.mb-4
-    | BJM - 
-    a(href="https://github.com/benmepham/strava-app") strava-app:#{version}
+    footer.container.mb-4
+      | BJM - 
+      a(href="https://github.com/benmepham/strava-app") strava-app:#{version}
+    
+    if analyticsUrl
+      noscript
+        img(src=analyticsImgUrl)
+      script(defer='' src=analyticsUrl)
+

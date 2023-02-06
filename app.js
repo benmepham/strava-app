@@ -39,10 +39,17 @@ app.use(helmet());
 app.use(
     helmet.contentSecurityPolicy({
         directives: {
-            "script-src": ["'self'", "cdnjs.cloudflare.com"],
+            "script-src": [
+                "'self'",
+                "cdnjs.cloudflare.com",
+                `${process.env.ANALYTICS_CSP}`,
+            ],
             "style-src": ["'self'", "cdnjs.cloudflare.com"],
+            "connect-src": [`${process.env.ANALYTICS_CSP}`],
+            "img-src": ["'self'", `${process.env.ANALYTICS_CSP}`],
         },
-    })
+    }),
+    helmet.crossOriginEmbedderPolicy({ policy: "credentialless" })
 );
 
 app.use(express.json());
@@ -102,11 +109,21 @@ app.delete("/api/delete", ensureAuthenticatedApi, deleteAccount);
 app.post("/api/merge", ensureAuthenticatedApi, mergeActivies);
 
 app.get("/", function (req, res) {
-    res.render("index", { user: req.user, version });
+    res.render("index", {
+        user: req.user,
+        version,
+        analyticsUrl: process.env.ANALYTICS_URL,
+        analyticsImgUrl: process.env.ANALYTICS_IMG_URL,
+    });
 });
-
+console.log(process.env.ANALYTICS_URL);
 app.get("/account", ensureAuthenticated, function (req, res) {
-    res.render("account", { user: req.user, version });
+    res.render("account", {
+        user: req.user,
+        version,
+        analyticsUrl: process.env.ANALYTICS_URL,
+        analyticsImgUrl: process.env.ANALYTICS_IMG_URL,
+    });
 });
 
 // GET /auth/strava
