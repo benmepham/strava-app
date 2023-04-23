@@ -28,7 +28,14 @@ if (version_env) {
         version = version_env.match(/(?!-)([\w\d]){7}/)[0];
     else version = version_env.substring(10, version_env.indexOf("-"));
 }
-console.log("strava-app, env: " + environment + ", version: " + version);
+console.log(
+    "strava-app, env: " +
+        environment +
+        ", version: " +
+        version +
+        ", analytics: " +
+        process.env.ANALYTICS_URL
+);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
@@ -45,7 +52,7 @@ app.use(
                 `${process.env.ANALYTICS_CSP}`,
             ],
             "style-src": ["'self'", "cdnjs.cloudflare.com"],
-            "connect-src": [`${process.env.ANALYTICS_CSP}`],
+            "connect-src": ["'self'", `${process.env.ANALYTICS_CSP}`],
             "img-src": ["'self'", `${process.env.ANALYTICS_CSP}`],
         },
     }),
@@ -116,7 +123,7 @@ app.get("/", function (req, res) {
         analyticsImgUrl: process.env.ANALYTICS_IMG_URL,
     });
 });
-console.log(process.env.ANALYTICS_URL);
+
 app.get("/account", ensureAuthenticated, function (req, res) {
     res.render("account", {
         user: req.user,
