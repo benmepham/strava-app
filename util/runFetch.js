@@ -61,12 +61,13 @@ async function getActivityData(activityId, token) {
     }
 }
 
-function secondsToString(time) {
-    let mins = Math.floor(time / 60);
-    let secs = Math.round(time - mins * 60);
-    let ret;
-    ret = mins + ":" + (secs < 10 ? "0" : "") + secs;
-    return ret;
+function secondsToString(seconds) {
+    const h = Math.floor(seconds / 3600),
+        m = Math.floor((seconds % 3600) / 60),
+        s = Math.floor((seconds % 3600) % 60);
+    let hDisp = "";
+    if (h != 0) hDisp = ("0" + h).slice(-2) + ":";
+    return hDisp + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
 }
 
 function parseRun(run) {
