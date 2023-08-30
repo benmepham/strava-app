@@ -19,7 +19,7 @@
     "gpx-builder": "^5.2.1",
     "helmet": "^6.2.0",
     "http-errors": "^2.0.0",
-    "mongodb": "^4.16.0",
+    "mongodb": "^4.17.0",
     "morgan": "^1.10.0",
     "node-fetch": "^2.6.11",
     "nodemailer": "^6.9.3",
