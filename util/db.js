@@ -68,7 +68,6 @@ async function setToken(id, time, refresh, access) {
             },
             { upsert: false, returnDocument: "after" }
         );
-        console.log("db done" + res.value.access_token);
         return res;
     } catch (err) {
         return debug(err);
