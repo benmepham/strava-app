@@ -1,6 +1,6 @@
 # Strava-App
 
-⚠️ this was a proof of concept and will have bugs! With the benefit of hindsight and more experience I would build it differently today.
+⚠️ this is a rudimentary proof of concept and will have bugs!
 
 Available at: [strava.bjm.me.uk](https://strava.bjm.me.uk)
 
