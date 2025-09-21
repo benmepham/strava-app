@@ -19,70 +19,30 @@ block content
     .container.maincontainer
       h1= "Hello " + user.name
       br
-      h2 Outdoor Runs
+      h2 Runs
       table.table#table1(hidden)
         thead
           tr
             th(scope='col') Name
             th(scope='col') Date
+            th(scope='col') Start Time (UTC)
             th(scope='col') Distance
             th(scope='col') Moving Time
             th(scope='col') Moving Pace
-            th(scope='col') 5K Time
-            th(scope='col') 5K Pace
-            th(scope='col') 10K Time
-            th(scope='col') 10K Pace
+            th(scope='col') Add to merge list
         tbody
       .row
-        a.btn.btn-primary.d-inline#get Get
-        input#getNumber.form-control.d-inline(type='number' min="1" max="20" value="1")
+        a.btn.btn-primary.d-inline#get Get More
+        input#getNumber.form-control.d-inline(type='number' min="10" max="30" value="10")
 
-      h2.mt-4 Specific Run
-      table.table#table2(hidden)
-        thead
-          tr
-            th(scope='col') Name
-            th(scope='col') Date
-            th(scope='col') Distance
-            th(scope='col') Moving Time
-            th(scope='col') Moving Pace
-            th(scope='col') 5K Time
-            th(scope='col') 5K Pace
-            th(scope='col') 10K Time
-            th(scope='col') 10K Pace
-        tbody
+      h2.mt-4 Merge Activities
       div
-        label(for='activityUrl') Enter Activity URL or Activity ID
-        input#activityUrl.form-control(type='text' aria-describedby='activityUrlHelp' placeholder='Enter URL')
-        small#activityUrlHelp.form-text.text-muted Either from the Strava App or Website, paste the Activity ID or URL (in the format https://strava.app.link/12345 or https://www.strava.com/activities/12345 )
-        .invalid-feedback#activityUrlInvalidFeedback
-        button#activityUrlGet.my-2.btn.btn-primary(type='submit') Fetch
-
-      h2.mt-4 Merge Activities (BETA)
-      div
-        label(for='mergeUrl1') Enter Activity 1 URL or Activity ID
-        input#mergeUrl1.form-control(type='text' aria-describedby='mergeUrl1Help' placeholder='Enter URL 1')
-        small#mergeUrl1Help.form-text.text-muted Either from the Strava App or Website, paste the Activity ID or URL (in the format https://strava.app.link/12345 or https://www.strava.com/activities/12345 )
-        .invalid-feedback#mergeUrl1InvalidFeedback
+        ul#mergeList.list-group
+        button.btn.btn-success#submitMerge Merge Selected Activities
+        p#mergeFeedback
         
-        label(for='mergeUrl2') Enter Activity 2 URL or Activity ID
-        input#mergeUrl2.form-control(type='text' aria-describedby='mergeUrl2Help' placeholder='Enter URL 2')
-        small#mergeUrl2Help.form-text.text-muted Either from the Strava App or Website, paste the Activity ID or URL (in the format https://strava.app.link/12345 or https://www.strava.com/activities/12345 )
-        .invalid-feedback#mergeUrl2InvalidFeedback
-        button#submitMerge.my-2.btn.btn-primary(type='submit') Merge
-        #mergeFeedback
-
     .container-sm.settings
       h2.mt-4 Settings
-      form.mb-4
-        .form-group
-          label(for='email') Email:
-          input#email.form-control(type='email' value=user.email name='email')
-        .checkbox
-          label
-            input#emailChecked(type='checkbox' checked=user.sendEmails)
-            |  Enable emails
-        a.btn.btn-primary#updateSettings Update
       button.btn.btn-danger#deleteAccount Delete Account
 
   // Modal
@@ -98,27 +58,6 @@ block content
         .modal-footer
           button.btn.btn-secondary(type='button' data-dismiss='modal') Close
           a.btn.btn-primary(href="/auth/strava") Reconnect
-
-  if user.login_count<=1
-    #emailModal.modal.fade(tabindex='-1' role='dialog' aria-labelledby='emailModalLabel' aria-hidden='true')
-      .modal-dialog(role='document')
-        .modal-content
-          .modal-header
-            h5#emailModalLabel.modal-title Welcome to the Strava App
-            button.close#emailModalClose(type='button' data-dismiss='modal' aria-label='Close')
-              span(aria-hidden='true') &times;
-          .modal-body
-            | If you would like to receive an email each time you complete a run, please enter your email address below:
-            br
-            br
-            form
-              .form-group
-                label(for='exampleInputEmail1') Email address
-                input#exampleInputEmail1.form-control(type='email' aria-describedby='emailHelp' placeholder='Enter email')
-                small#emailHelp.form-text.text-muted We&apos;ll never share your email with anyone else.
-          .modal-footer
-            button.btn.btn-secondary#emailModalClose(type='button' data-dismiss='modal') Close
-            button.btn.btn-primary#email_submit(type='button') Sign up to emails
 
   script(src='/javascript/account.js')
 

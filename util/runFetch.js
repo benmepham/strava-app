@@ -1,5 +1,3 @@
-import { validateRun } from "./validateRun.js";
-
 export async function getActivityList(token, page) {
     let resp = await fetch(
         "https://www.strava.com/api/v3/athlete/activities?page=" +
@@ -31,9 +29,9 @@ export async function getRuns(token, page, num, pagePos) {
             dataToReturn.page++;
             activities = await getActivityList(token, dataToReturn.page);
             dataToReturn.pagePos = 0;
-            console.log(activities);
+            // console.log(activities);
         }
-        console.log(dataToReturn.page, dataToReturn.pagePos, dataToReturn.runs);
+        // console.log(dataToReturn.page, dataToReturn.pagePos, dataToReturn.runs);
         if (!activities[dataToReturn.pagePos]) throw "Not enough valid runs";
         if (validateRun(activities[dataToReturn.pagePos]))
             dataToReturn.runs.push(activities[dataToReturn.pagePos]);
@@ -57,7 +55,7 @@ export async function getActivityData(activityId, token) {
     }
 }
 
-export function secondsToString(seconds) {
+function secondsToString(seconds) {
     const h = Math.floor(seconds / 3600),
         m = Math.floor((seconds % 3600) / 60),
         s = Math.floor((seconds % 3600) % 60);
@@ -66,21 +64,20 @@ export function secondsToString(seconds) {
     return hDisp + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
 }
 
+function validateRun(run) {
+    if (run.type != "Run") return false;
+    if (!run.start_latlng || run.start_latlng.length != 2) return false;
+    return true;
+}
+
 export function parseRun(run) {
-    if (!validateRun(run)) throw "Activity is invalid";
+    if (!validateRun(run)) throw "Invalid run data";
     try {
         return {
             name: run.name,
             date: run.start_date.slice(0, 10),
-            time5k: secondsToString(run.best_efforts[5].moving_time),
-            pace5k: secondsToString(run.best_efforts[5].moving_time / 5),
+            startTime: run.start_date.slice(11, 19),
             id: run.id,
-            time10k: run.best_efforts[6]
-                ? secondsToString(run.best_efforts[6].moving_time)
-                : "",
-            pace10k: run.best_efforts[6]
-                ? secondsToString(run.best_efforts[6].moving_time / 10)
-                : "",
             distance: (run.distance / 1000).toFixed(2).toString() + " km",
             timeMoving: secondsToString(run["moving_time"]),
             paceMoving: secondsToString(

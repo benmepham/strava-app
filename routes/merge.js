@@ -1,5 +1,6 @@
 import FormData from "form-data";
-import { StravaBuilder, buildGPX } from "gpx-builder";
+import { buildGPX, StravaBuilder } from "gpx-builder";
+import { getActivityData } from "../util/runFetch.js";
 const { Point, Metadata } = StravaBuilder.MODELS;
 
 async function getActivityStreams(id, token, key) {
@@ -87,15 +88,24 @@ function genGpx(activityStreams, activityData) {
 }
 
 export async function mergeActivies(req, res) {
-    let activity1, activity2;
+    // get json from post request data
+    const data = req.body.runs;
+    console.log(data);
+    const arr = data.split(",");
+    console.log(arr);
+    let activity1 = arr[0],
+        activity2 = arr[1];
 
-    try {
-        activity1 = await parseStravaUrl(req.query.url1);
-        activity2 = await parseStravaUrl(req.query.url2);
-    } catch (err) {
-        console.log(err);
-        return res.status(400).send("Activity URL invalid");
-    }
+    // todo: shuffle into correct order
+    // todo: verify same day
+
+    //   try {
+    //     activity1 = await parseStravaUrl(activity1);
+    //     activity2 = await parseStravaUrl(activity2);
+    //   } catch (err) {
+    //     console.log(err);
+    //     return res.status(400).send("Activity URL invalid");
+    //   }
 
     let activity1Data, activity2Data;
     try {
@@ -106,8 +116,11 @@ export async function mergeActivies(req, res) {
         return res.status(500).send("Unable to fetch activities");
     }
 
-    if (new Date(activity2Data.start_date) < new Date(activity1Data.start_date))
+    if (
+        new Date(activity2Data.start_date) < new Date(activity1Data.start_date)
+    ) {
         return res.status(400).send("wrong activity order");
+    }
 
     // todo: handle if activity times/locations overlap
 
@@ -153,6 +166,7 @@ export async function mergeActivies(req, res) {
     formData.append("sport_type", "Run");
 
     let activityUploadStatus;
+    console.log(formData);
 
     try {
         activityUploadStatus = await uploadActivity(
@@ -185,7 +199,7 @@ export async function mergeActivies(req, res) {
     if (
         !activityUploadStatus ||
         activityUploadStatus.status != "Your activity is ready."
-    )
+    ) {
         return res
             .status(500)
             .send(
@@ -193,6 +207,7 @@ export async function mergeActivies(req, res) {
                     ? activityUploadStatus.error
                     : "upload error"
             );
+    }
 
     return res.status(200).send(activityUploadStatus.activity_id.toString());
 }

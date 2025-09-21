@@ -14,6 +14,9 @@ function addToTable(data, table) {
             run.date +
             "</td>" +
             "<td>" +
+            run.startTime +
+            "</td>" +
+            "<td>" +
             run.distance +
             "</td>" +
             "<td>" +
@@ -23,16 +26,10 @@ function addToTable(data, table) {
             run.paceMoving +
             "</td>" +
             "<td>" +
-            run.time5k +
-            "</td>" +
-            "<td>" +
-            run.pace5k +
-            "</td>" +
-            "<td>" +
-            run.time10k +
-            "</td>" +
-            "<td>" +
-            run.pace10k +
+            // button to add activity to merge list
+            '<button class="btn btn-primary" onclick=addToMerge(' +
+            run.id +
+            ') type="button">Add to merge</button>' +
             "</td>" +
             "</tr>";
     }
@@ -81,12 +78,21 @@ function getRun(url, table) {
     });
 }
 
-function validateEmail(email) {
-    const mailformat =
-        /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
-    // Email validation regex from: https://tutorial.eyehunts.com/js/email-regex-javascript-validation-example-code/
-    if (!email.match(mailformat)) {
-        alert("Invalid email address!");
+function addToMerge(id) {
+    console.log("Add to merge: " + id);
+    // add to ul with id mergeList
+    const li = document.createElement("li");
+    li.classList.add("list-group-item");
+    li.innerText = id;
+    document.getElementById("mergeList").appendChild(li);
+}
+
+function validateIdOrUrl(input) {
+    if (
+        !input.includes("strava.com/activities/") &&
+        !input.includes("strava.app.link/") &&
+        !/^\d{10}$/.test(input)
+    ) {
         return false;
     }
     return true;
@@ -95,35 +101,6 @@ function validateEmail(email) {
 $(document).ready(function () {
     $("#table1").data("page", 1);
     $("#table1").data("pagePos", 0);
-
-    const queryParamsString = window.location.search.substr(1);
-    if (queryParamsString == "new") {
-        $("#emailModal").modal("show");
-    }
-
-    // override checkbox
-    $("#emailChecked")[0].checked = $("#emailChecked").attr("checked");
-
-    $("#email_submit").click(function () {
-        const email = $("#exampleInputEmail1").val();
-        if (validateEmail(email)) {
-            $.ajax({
-                url: "/api/email?email=" + email,
-                type: "post",
-                success: function () {
-                    window.location.replace("/account");
-                },
-                error: function (xhr, status, error) {
-                    console.error(xhr, status, error);
-                    alert("Error - " + xhr.status + ": " + xhr.responseText);
-                },
-            });
-        }
-    });
-
-    $("#emailModalClose").click(function () {
-        window.location.replace("/account");
-    });
 
     $("#get").click(function () {
         const page = $("#table1").data("page");
@@ -135,48 +112,8 @@ $(document).ready(function () {
                 page +
                 "&pagePos=" +
                 pagePos,
-
             "table1"
         );
-    });
-
-    $("#activityUrlGet").click(function () {
-        const table = document.getElementById("table2");
-        const urlElement = document.getElementById("activityUrl");
-        const url = urlElement.value;
-        if (table.rows.length > 1) table.deleteRow(1);
-
-        // quick sanity check before sending to back end
-        if (
-            !url.includes("strava.com/activities/") &&
-            !url.includes("strava.app.link/") &&
-            !/^\d{10}$/.test(url)
-        ) {
-            document.getElementById("activityUrlInvalidFeedback").innerText =
-                "Please enter a valid activity ID or URL";
-            urlElement.classList.add("is-invalid");
-            return;
-        }
-        urlElement.classList.remove("is-invalid");
-        getRun("/api/activities?url=" + url, "table2");
-    });
-
-    $("#updateSettings").click(function () {
-        const email = $("#email").val();
-        const checkedEmail = $("#emailChecked").is(":checked");
-        if (validateEmail(email)) {
-            $.ajax({
-                url: "/api/email?email=" + email + "&enabled=" + checkedEmail,
-                type: "post",
-                success: function () {
-                    alert("Updated successfully");
-                },
-                error: function (xhr, status, error) {
-                    console.error(xhr, status, error);
-                    alert("Error - " + xhr.status + ": " + xhr.responseText);
-                },
-            });
-        }
     });
 
     $("#deleteAccount").click(function () {
@@ -195,56 +132,45 @@ $(document).ready(function () {
     });
 
     $("#submitMerge").click(function () {
-        const urlElement1 = document.getElementById("mergeUrl1");
-        const url1 = urlElement1.value;
-        const urlElement2 = document.getElementById("mergeUrl2");
-        const url2 = urlElement2.value;
-
-        // quick sanity check before sending to back end
-        if (
-            !url1.includes("strava.com/activities/") &&
-            !url1.includes("strava.app.link/") &&
-            !/^\d{10}$/.test(url1)
-        ) {
-            document.getElementById("mergeUrl1InvalidFeedback").innerText =
-                "Please enter a valid activity ID or URL";
-            urlElement1.classList.add("is-invalid");
+        // get the list of ids from the ul with id mergeList
+        let mergeList = document
+            .getElementById("mergeList")
+            .getElementsByTagName("li");
+        // turn it into a array of the innerText of each li
+        mergeList = Array.from(mergeList);
+        mergeList = mergeList.map((li) => li.innerText);
+        console.log(mergeList);
+        if (mergeList.length < 2) {
+            alert("Please select exactly two activities to merge");
             return;
         }
 
-        // quick sanity check before sending to back end
-        if (
-            !url2.includes("strava.com/activities/") &&
-            !url2.includes("strava.app.link/") &&
-            !/^\d{10}$/.test(url2)
-        ) {
-            document.getElementById("mergeUrl2InvalidFeedback").innerText =
-                "Please enter a valid activity ID or URL";
-            urlElement2.classList.add("is-invalid");
-            return;
-        }
-
-        urlElement1.classList.remove("is-invalid");
-        urlElement2.classList.remove("is-invalid");
-
-        $.ajax({
-            url: "/api/merge?url1=" + url1 + "&url2=" + url2,
-            type: "post",
-            beforeSend: function () {
-                $(".loader").removeClass("invisible");
+        fetch("/api/merge", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
             },
-            success: function (data) {
+            body: JSON.stringify({ runs: mergeList.toString() }),
+        })
+            .then((response) => {
+                if (!response.ok) {
+                    return response.text().then((text) => {
+                        throw new Error(text || response.status);
+                    });
+                }
+                return response.text();
+            })
+            .then((data) => {
                 document.getElementById(
                     "mergeFeedback"
                 ).innerHTML = `Success: <a href="https://strava.com/activities/${data}" target="_blank">View activity</a>`;
-            },
-            error: function (xhr, status, error) {
+            })
+            .catch((error) => {
                 document.getElementById("mergeFeedback").innerText =
-                    "Error - " + xhr.status + ": " + xhr.responseText;
-            },
-            complete: function () {
+                    "Error - " + error.message;
+            })
+            .finally(() => {
                 $(".loader").addClass("invisible");
-            },
-        });
+            });
     });
 });

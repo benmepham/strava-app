@@ -1,17 +1,11 @@
 import express from "express";
 import session from "express-session";
-import helmet from "helmet";
 import passport from "passport";
 import OAuth2Strategy from "passport-oauth2";
 import { view } from "./routes/api.js";
 import { deleteAccount } from "./routes/delete.js";
 import { mergeActivies } from "./routes/merge.js";
 import { deserializeUserQuery, initDB, newUserQuery } from "./util/db.js";
-
-// import { view } from "./routes/api.js";
-// const { deleteAccount } = require("./routes/delete.js");
-// const { deserializeUserQuery, newUserQuery } = require("./util/db.js");
-// const { mergeActivies } = require("./routes/merge.js");
 
 const app = express();
 const environment = Deno.env.get("ENVIRONMENT") || "development";
@@ -40,36 +34,30 @@ app.set("views", "./views");
 app.set("view engine", "pug");
 
 // helmet setup
-app.use(helmet());
-app.use(
-    helmet.contentSecurityPolicy({
-        directives: {
-            "script-src": [
-                "'self'",
-                "cdnjs.cloudflare.com",
-                `${Deno.env.get("ANALYTICS_CSP")}`,
-            ],
-            "style-src": ["'self'", "cdnjs.cloudflare.com"],
-            "connect-src": ["'self'", `${Deno.env.get("ANALYTICS_CSP")}`],
-            "img-src": ["'self'", `${Deno.env.get("ANALYTICS_CSP")}`],
-        },
-    }),
-    helmet.crossOriginEmbedderPolicy({ policy: "credentialless" })
-);
+// app.use(helmet());
+// app.use(
+//     helmet.contentSecurityPolicy({
+//         directives: {
+//             "script-src": [
+//                 "'self'",
+//                 "cdnjs.cloudflare.com",
+
+//                 `${Deno.env.get("ANALYTICS_CSP")}`,
+//             ],
+//             "style-src": ["'self'", "cdnjs.cloudflare.com"],
+//             "connect-src": ["'self'", `${Deno.env.get("ANALYTICS_CSP")}`],
+//             "img-src": ["'self'", `${Deno.env.get("ANALYTICS_CSP")}`],
+//         },
+//     }),
+//     helmet.crossOriginEmbedderPolicy({ policy: "credentialless" })
+// );
 
 app.use(express.json());
-// app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
-// app.use(
-//     cookieSession({
-//         name: "session",
-//         keys: [Deno.env.get("SECRET")],
-//         maxAge: 3600000 * 24 * 90, // 90 days
-//     })
-// );
 app.use(
     session({
-        secret: "keyboard cat",
+        secret: Deno.env.get("SECRET"),
         resave: false,
         saveUninitialized: true,
         cookie: { secure: false },
@@ -89,7 +77,6 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (obj, done) {
-    console.log("deserialize user id " + obj.athlete_id);
     deserializeUserQuery(obj.athlete_id, done);
 });
 
@@ -103,17 +90,12 @@ passport.use(
             tokenURL: "https://www.strava.com/oauth/token",
         },
         function (accessToken, refreshToken, params, profile, done) {
-            // asynchronous verification, for effect...
-            process.nextTick(function () {
-                newUserQuery(params, done, accessToken, refreshToken);
-            });
+            newUserQuery(params, done, accessToken, refreshToken);
         }
     )
 );
 
 app.get("/api/activities", ensureAuthenticatedApi, view);
-
-// app.post("/api/email", ensureAuthenticatedApi, saveEmailToDb);
 
 app.delete("/api/delete", ensureAuthenticatedApi, deleteAccount);
 
@@ -201,6 +183,6 @@ app.use(function (err, req, res, next) {
     res.render("error");
 });
 
-// export app;
-
-app.listen(3000);
+app.listen(Deno.env.get("PORT") || 3000, () => {
+    console.log("Listening on port " + (Deno.env.get("PORT") || 3000));
+});
