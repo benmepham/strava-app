@@ -1,25 +1,23 @@
-const createError = require("http-errors");
-const express = require("express");
-const helmet = require("helmet");
-const path = require("path");
-const passport = require("passport");
-const OAuth2Strategy = require("passport-oauth2");
-const session = require("express-session");
-const MongoStore = require("connect-mongo");
-const debug = require("debug")("strava-app:app");
+import express from "express";
+import session from "express-session";
+import helmet from "helmet";
+import passport from "passport";
+import OAuth2Strategy from "passport-oauth2";
+import { view } from "./routes/api.js";
+import { deleteAccount } from "./routes/delete.js";
+import { mergeActivies } from "./routes/merge.js";
+import { deserializeUserQuery, initDB, newUserQuery } from "./util/db.js";
 
-const api = require("./routes/api");
-const webhook = require("./routes/webhook");
-const { saveEmailToDb } = require("./routes/email_api");
-const { deleteAccount } = require("./routes/delete");
-const { loadDb, deserializeUserQuery, newUserQuery } = require("./util/db");
-const { mergeActivies } = require("./routes/merge");
+// import { view } from "./routes/api.js";
+// const { deleteAccount } = require("./routes/delete.js");
+// const { deserializeUserQuery, newUserQuery } = require("./util/db.js");
+// const { mergeActivies } = require("./routes/merge.js");
 
 const app = express();
-const environment = app.get("env");
-const version_env = process.env.VERSION_ENV;
+const environment = Deno.env.get("ENVIRONMENT") || "development";
+const version_env = Deno.env.get("VERSION");
 
-loadDb();
+initDB();
 
 // version number from GitHub actions
 let version = "dev";
@@ -34,11 +32,11 @@ console.log(
         ", version: " +
         version +
         ", analytics: " +
-        process.env.ANALYTICS_URL
+        Deno.env.get("ANALYTICS_URL")
 );
 
 // view engine setup
-app.set("views", path.join(__dirname, "views"));
+app.set("views", "./views");
 app.set("view engine", "pug");
 
 // helmet setup
@@ -49,11 +47,11 @@ app.use(
             "script-src": [
                 "'self'",
                 "cdnjs.cloudflare.com",
-                `${process.env.ANALYTICS_CSP}`,
+                `${Deno.env.get("ANALYTICS_CSP")}`,
             ],
             "style-src": ["'self'", "cdnjs.cloudflare.com"],
-            "connect-src": ["'self'", `${process.env.ANALYTICS_CSP}`],
-            "img-src": ["'self'", `${process.env.ANALYTICS_CSP}`],
+            "connect-src": ["'self'", `${Deno.env.get("ANALYTICS_CSP")}`],
+            "img-src": ["'self'", `${Deno.env.get("ANALYTICS_CSP")}`],
         },
     }),
     helmet.crossOriginEmbedderPolicy({ policy: "credentialless" })
@@ -61,21 +59,26 @@ app.use(
 
 app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "public")));
-let sessionSetup = {
-    secret: process.env.SECRET,
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: false, maxAge: 3600000 * 24 * 90 },
-    store: MongoStore.create({
-        mongoUrl: `mongodb://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOSTNAME}:27017/${process.env.MONGO_DB}?authSource=admin`,
-    }),
-};
+app.use(express.static("./public"));
+// app.use(
+//     cookieSession({
+//         name: "session",
+//         keys: [Deno.env.get("SECRET")],
+//         maxAge: 3600000 * 24 * 90, // 90 days
+//     })
+// );
+app.use(
+    session({
+        secret: "keyboard cat",
+        resave: false,
+        saveUninitialized: true,
+        cookie: { secure: false },
+    })
+);
 if (environment == "production") {
     app.set("trust proxy", 1); // trust first proxy
     sessionSetup.cookie.secure = true; // serve secure cookies
 }
-app.use(session(sessionSetup));
 
 // Passport Setup
 app.use(passport.initialize());
@@ -86,15 +89,16 @@ passport.serializeUser(function (user, done) {
 });
 
 passport.deserializeUser(function (obj, done) {
-    deserializeUserQuery(obj.id, done);
+    console.log("deserialize user id " + obj.athlete_id);
+    deserializeUserQuery(obj.athlete_id, done);
 });
 
 passport.use(
     new OAuth2Strategy(
         {
-            clientID: process.env.STRAVA_CLIENT_ID,
-            clientSecret: process.env.STRAVA_CLIENT_SECRET,
-            callbackURL: process.env.CALLBACKURL,
+            clientID: Deno.env.get("STRAVA_CLIENT_ID"),
+            clientSecret: Deno.env.get("STRAVA_CLIENT_SECRET"),
+            callbackURL: Deno.env.get("STRAVA_CALLBACK_URL"),
             authorizationURL: "https://www.strava.com/oauth/authorize",
             tokenURL: "https://www.strava.com/oauth/token",
         },
@@ -107,9 +111,9 @@ passport.use(
     )
 );
 
-app.get("/api/activities", ensureAuthenticatedApi, api.view);
+app.get("/api/activities", ensureAuthenticatedApi, view);
 
-app.post("/api/email", ensureAuthenticatedApi, saveEmailToDb);
+// app.post("/api/email", ensureAuthenticatedApi, saveEmailToDb);
 
 app.delete("/api/delete", ensureAuthenticatedApi, deleteAccount);
 
@@ -119,8 +123,8 @@ app.get("/", function (req, res) {
     res.render("index", {
         user: req.user,
         version,
-        analyticsUrl: process.env.ANALYTICS_URL,
-        analyticsImgUrl: process.env.ANALYTICS_IMG_URL,
+        analyticsUrl: Deno.env.get("ANALYTICS_URL"),
+        analyticsImgUrl: Deno.env.get("ANALYTICS_IMG_URL"),
     });
 });
 
@@ -128,8 +132,8 @@ app.get("/account", ensureAuthenticated, function (req, res) {
     res.render("account", {
         user: req.user,
         version,
-        analyticsUrl: process.env.ANALYTICS_URL,
-        analyticsImgUrl: process.env.ANALYTICS_IMG_URL,
+        analyticsUrl: Deno.env.get("ANALYTICS_URL"),
+        analyticsImgUrl: Deno.env.get("ANALYTICS_IMG_URL"),
     });
 });
 
@@ -152,7 +156,7 @@ app.get(
 //   which, in this example, will redirect the user to the home page.
 app.get(
     "/auth/strava/callback",
-    passport.authenticate("oauth2", { failureRedirect: "/" }),
+    passport.authenticate("oauth2", { failureRedirect: "/failoauth" }),
     function (req, res) {
         // On first login, show the welcome message
         if (req.user.login_count <= 1) return res.redirect("/account?new");
@@ -168,8 +172,8 @@ app.get("/logout", function (req, res, next) {
 });
 
 // webhooks
-app.post("/webhook", webhook.post);
-app.get("/webhook", webhook.get);
+// app.post("/webhook", webhook.post);
+// app.get("/webhook", webhook.get);
 
 // Simple route middleware to ensure user is authenticatec
 function ensureAuthenticated(req, res, next) {
@@ -197,4 +201,6 @@ app.use(function (err, req, res, next) {
     res.render("error");
 });
 
-module.exports = app;
+// export app;
+
+app.listen(3000);

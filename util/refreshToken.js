@@ -1,7 +1,4 @@
-const fetch = require("node-fetch");
-const dotenv = require("dotenv");
-dotenv.config();
-const db = require("../util/db");
+const db = require("../util/db.js");
 
 exports.refreshToken = refreshToken;
 
@@ -12,8 +9,8 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
         let resp = await fetch(
             "https://www.strava.com/api/v3/oauth/token?" +
                 new URLSearchParams({
-                    client_id: process.env.STRAVA_CLIENT_ID,
-                    client_secret: process.env.STRAVA_CLIENT_SECRET,
+                    client_id: Deno.env.get(STRAVA_CLIENT_ID),
+                    client_secret: Deno.env.get(STRAVA_CLIENT_SECRET),
                     grant_type: "refresh_token",
                     refresh_token: refresh_token,
                 }),

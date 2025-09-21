@@ -1,0 +1,8 @@
+[tools]
+deno = "2"
+
+[env]
+_.file = ".env"
+
+[tasks]
+start = 'printenv'

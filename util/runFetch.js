@@ -1,6 +1,4 @@
-const fetch = require("node-fetch");
-const { validateRun } = require("./validateRun");
-const debug = require("debug")("strava-app:runFetch");
+const { validateRun } = require("./validateRun.js");
 
 module.exports = { getRuns, getActivityData, parseRun };
 
@@ -14,7 +12,7 @@ async function getActivityList(token, page) {
         }
     );
     if (!resp.ok) {
-        debug("getActivity Error:", resp.status);
+        console.log("getActivity Error:", resp.status);
         throw "Error getting activities list: " + resp.status;
     } else {
         return await resp.json();
@@ -29,15 +27,15 @@ async function getRuns(token, page, num, pagePos) {
         pagePos: pagePos,
     };
     let activities = await getActivityList(token, dataToReturn.page);
-    debug(activities);
+    console.log(activities);
     while (dataToReturn.runs.length != num) {
         if (dataToReturn.pagePos == 29) {
             dataToReturn.page++;
             activities = await getActivityList(token, dataToReturn.page);
             dataToReturn.pagePos = 0;
-            debug(activities);
+            console.log(activities);
         }
-        debug(dataToReturn.page, dataToReturn.pagePos, dataToReturn.runs);
+        console.log(dataToReturn.page, dataToReturn.pagePos, dataToReturn.runs);
         if (!activities[dataToReturn.pagePos]) throw "Not enough valid runs";
         if (validateRun(activities[dataToReturn.pagePos]))
             dataToReturn.runs.push(activities[dataToReturn.pagePos]);
@@ -54,7 +52,7 @@ async function getActivityData(activityId, token) {
         }
     );
     if (!resp.ok) {
-        debug("getActivityData Error:", resp.status);
+        console.log("getActivityData Error:", resp.status);
         throw "getActivityData Error: " + resp.status;
     } else {
         return await resp.json();
@@ -92,7 +90,7 @@ function parseRun(run) {
             ),
         };
     } catch (error) {
-        debug(error);
+        console.log(error);
         throw "Error parsing run data";
     }
 }

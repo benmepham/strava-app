@@ -1,10 +1,7 @@
-const fetch = require("node-fetch");
-const debug = require("debug")("strava-app:parseStravaUrl");
-
 async function parseStravaAppLinkUrl(activityUrl) {
     let resp = await fetch(activityUrl);
     if (!resp.ok) {
-        debug("Error:", resp.status);
+        console.log("Error:", resp.status);
     } else {
         const data = await resp.text();
         const dataMatch = data.match(
@@ -25,7 +22,7 @@ async function parseStravaUrl(activityUrlIn) {
         if (!activityUrl)
             return res.status(400).send("strava.app.link URL is invalid");
     }
-    debug(activityUrl);
+    console.log(activityUrl);
 
     if (!/^\d{10}$/.test(activityUrl))
         return res.status(400).send("Activity ID input is invalid");

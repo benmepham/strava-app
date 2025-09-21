@@ -1,23 +1,18 @@
-const { parseStravaUrl } = require("../util/parseStravaUrl");
-const refreshToken = require("../util/refreshToken");
-const runFetch = require("../util/runFetch");
-const debug = require("debug")("strava-app:api");
-
-exports.view = async function (req, res) {
+export async function view(req, res) {
     let returned_access_token = await refreshToken.refreshToken(
         req.user.id,
         req.user.access_token,
         req.user.refresh_token,
         req.user.expires_at
     );
-    debug("api access token " + returned_access_token);
+    console.log("api access token " + returned_access_token);
 
     let activityUrl = req.query.url;
     if (activityUrl) {
         try {
             activityUrl = await parseStravaUrl(activityUrl);
         } catch (error) {
-            debug(error);
+            console.log(error);
             return res.status(400).send("Activity URL invalid");
         }
 
@@ -30,7 +25,7 @@ exports.view = async function (req, res) {
                 )
             );
         } catch (error) {
-            debug(error);
+            console.log(error);
             return res.status(400).send(error);
         }
         return res.send({ runs: [runData] });
@@ -55,7 +50,7 @@ exports.view = async function (req, res) {
         }
         res.send({ runs: runArray, page: runs.page, pagePos: runs.pagePos });
     } catch (error) {
-        debug(error);
+        console.log(error);
         res.status(500).send(error);
     }
-};
+}

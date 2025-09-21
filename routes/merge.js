@@ -1,9 +1,5 @@
-const fetch = require("node-fetch");
-var FormData = require("form-data");
-const debug = require("debug")("strava-app:merge_api");
-const { StravaBuilder, buildGPX } = require("gpx-builder");
-const { getActivityData } = require("../util/runFetch");
-const { parseStravaUrl } = require("../util/parseStravaUrl");
+import FormData from "form-data";
+import { StravaBuilder, buildGPX } from "gpx-builder";
 const { Point, Metadata } = StravaBuilder.MODELS;
 
 async function getActivityStreams(id, token, key) {
@@ -18,7 +14,7 @@ async function getActivityStreams(id, token, key) {
         }
     );
     if (!resp.ok) {
-        debug("getActivityStreams Error:", resp.status);
+        console.log("getActivityStreams Error:", resp.status);
         throw "Error getting activity streams: " + resp.status;
         // can't throw here
     } else {
@@ -38,7 +34,7 @@ async function getUpoadStatus(id, token) {
         headers: { Authorization: "Bearer " + token },
     });
     if (!resp.ok) {
-        debug("getUpoadStatus Error:", resp.status);
+        console.log("getUpoadStatus Error:", resp.status);
         return resp.json();
     } else {
         return resp.json();
@@ -54,7 +50,7 @@ async function uploadActivity(formData, token) {
         body: formData,
     });
     if (!resp.ok) {
-        debug("uploadActivity Error:", resp.status);
+        console.log("uploadActivity Error:", resp.status);
         return resp.json();
     } else {
         return resp.json();
@@ -90,14 +86,14 @@ function genGpx(activityStreams, activityData) {
     return points;
 }
 
-async function mergeActivies(req, res) {
+export async function mergeActivies(req, res) {
     let activity1, activity2;
 
     try {
         activity1 = await parseStravaUrl(req.query.url1);
         activity2 = await parseStravaUrl(req.query.url2);
     } catch (err) {
-        debug(err);
+        console.log(err);
         return res.status(400).send("Activity URL invalid");
     }
 
@@ -106,7 +102,7 @@ async function mergeActivies(req, res) {
         activity1Data = await getActivityData(activity1, req.user.access_token);
         activity2Data = await getActivityData(activity2, req.user.access_token);
     } catch (err) {
-        debug(err);
+        console.log(err);
         return res.status(500).send("Unable to fetch activities");
     }
 
@@ -129,15 +125,15 @@ async function mergeActivies(req, res) {
             "altitude,latlng,time"
         );
     } catch (err) {
-        debug(err);
+        console.log(err);
         return res.status(500).send("Unable to fetch activity streams");
     }
 
     const points = genGpx(activity1Streams, activity1Data);
     points.push(...genGpx(activity2Streams, activity2Data));
 
-    // debug(points[0]);
-    // debug(points[points.length - 1]);
+    // console.log(points[0]);
+    // console.log(points[points.length - 1]);
 
     const gpxData = new StravaBuilder();
     gpxData.setSegmentPoints(points);
@@ -163,9 +159,9 @@ async function mergeActivies(req, res) {
             formData,
             req.user.access_token
         );
-        debug(activityUploadStatus);
+        console.log(activityUploadStatus);
     } catch (err) {
-        debug(err);
+        console.log(err);
         return res.status(500).send("Error uploading merged activity");
     }
 
@@ -179,9 +175,9 @@ async function mergeActivies(req, res) {
                 activityUploadStatus.id,
                 req.user.access_token
             );
-            debug(activityUploadStatus);
+            console.log(activityUploadStatus);
         } catch (err) {
-            debug(err);
+            console.log(err);
             return res.status(500).send("Error uploading merged activity");
         }
     }
@@ -200,5 +196,3 @@ async function mergeActivies(req, res) {
 
     return res.status(200).send(activityUploadStatus.activity_id.toString());
 }
-
-module.exports = { mergeActivies };
