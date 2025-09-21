@@ -1,5 +1,9 @@
+import { parseStravaUrl } from "../util/parseStravaUrl.js";
+import { refreshToken } from "../util/refreshToken.js";
+import { getActivityData, getRuns, parseRun } from "../util/runFetch.js";
+
 export async function view(req, res) {
-    let returned_access_token = await refreshToken.refreshToken(
+    let returned_access_token = await refreshToken(
         req.user.id,
         req.user.access_token,
         req.user.refresh_token,
@@ -18,11 +22,8 @@ export async function view(req, res) {
 
         let runData;
         try {
-            runData = runFetch.parseRun(
-                await runFetch.getActivityData(
-                    activityUrl,
-                    returned_access_token
-                )
+            runData = parseRun(
+                await getActivityData(activityUrl, returned_access_token)
             );
         } catch (error) {
             console.log(error);
@@ -37,7 +38,7 @@ export async function view(req, res) {
             .send("invalid number of activites or page number");
 
     try {
-        let runs = await runFetch.getRuns(
+        let runs = await getRuns(
             returned_access_token,
             req.query.page,
             req.query.num,
@@ -45,8 +46,8 @@ export async function view(req, res) {
         );
         let runArray = [];
         for (let run of runs.runs) {
-            run = await runFetch.getActivityData(run.id, returned_access_token);
-            runArray.push(runFetch.parseRun(run));
+            run = await getActivityData(run.id, returned_access_token);
+            runArray.push(parseRun(run));
         }
         res.send({ runs: runArray, page: runs.page, pagePos: runs.pagePos });
     } catch (error) {

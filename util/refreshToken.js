@@ -1,8 +1,11 @@
-const db = require("../util/db.js");
+import { DatabaseSync } from "node:sqlite";
 
-exports.refreshToken = refreshToken;
-
-async function refreshToken(id, access_token, refresh_token, expires_at) {
+export async function refreshToken(
+    id,
+    access_token,
+    refresh_token,
+    expires_at
+) {
     let currentTime = Math.floor(+new Date() / 1000);
     if (expires_at < currentTime + 30) {
         // add 30 secs in case close to expiry time
@@ -23,6 +26,7 @@ async function refreshToken(id, access_token, refresh_token, expires_at) {
         }
         const data = await resp.json();
         // don't await to slightly speed up loading
+        db = DatabaseSync.open("test.db");
         const db_ret = db.setToken(
             id,
             data.expires_at,

@@ -10,7 +10,7 @@ async function parseStravaAppLinkUrl(activityUrl) {
         return dataMatch && dataMatch[0];
     }
 }
-async function parseStravaUrl(activityUrlIn) {
+export async function parseStravaUrl(activityUrlIn) {
     let activityUrl = activityUrlIn;
     const stravaUrlRegex = /(?!strava.com\/activities\/)([0-9]){10}/;
     const stravaShortUrlRegex = /strava.app.link\/[0-9a-zA-Z]{11}/;
@@ -29,5 +29,3 @@ async function parseStravaUrl(activityUrlIn) {
 
     return activityUrl;
 }
-
-module.exports = { parseStravaUrl };

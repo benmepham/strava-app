@@ -1,8 +1,6 @@
-const { validateRun } = require("./validateRun.js");
+import { validateRun } from "./validateRun.js";
 
-module.exports = { getRuns, getActivityData, parseRun };
-
-async function getActivityList(token, page) {
+export async function getActivityList(token, page) {
     let resp = await fetch(
         "https://www.strava.com/api/v3/athlete/activities?page=" +
             page +
@@ -19,7 +17,7 @@ async function getActivityList(token, page) {
     }
 }
 
-async function getRuns(token, page, num, pagePos) {
+export async function getRuns(token, page, num, pagePos) {
     let dataToReturn = {
         runs: [],
         page: page,
@@ -44,7 +42,7 @@ async function getRuns(token, page, num, pagePos) {
     return dataToReturn;
 }
 
-async function getActivityData(activityId, token) {
+export async function getActivityData(activityId, token) {
     let resp = await fetch(
         "https://www.strava.com/api/v3/activities/" + activityId,
         {
@@ -59,7 +57,7 @@ async function getActivityData(activityId, token) {
     }
 }
 
-function secondsToString(seconds) {
+export function secondsToString(seconds) {
     const h = Math.floor(seconds / 3600),
         m = Math.floor((seconds % 3600) / 60),
         s = Math.floor((seconds % 3600) % 60);
@@ -68,7 +66,7 @@ function secondsToString(seconds) {
     return hDisp + ("0" + m).slice(-2) + ":" + ("0" + s).slice(-2);
 }
 
-function parseRun(run) {
+export function parseRun(run) {
     if (!validateRun(run)) throw "Activity is invalid";
     try {
         return {
