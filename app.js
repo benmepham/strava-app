@@ -1,5 +1,5 @@
+import cookieSession from "cookie-session";
 import express from "express";
-import session from "express-session";
 import passport from "passport";
 import OAuth2Strategy from "passport-oauth2";
 import { view } from "./routes/api.js";
@@ -56,13 +56,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static("./public"));
 app.use(
-    session({
-        secret: Deno.env.get("SECRET"),
-        resave: false,
-        saveUninitialized: true,
-        cookie: { secure: false },
+    cookieSession({
+        name: "session",
+        keys: [Deno.env.get("SECRET")],
+
+        // Cookie Options
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
     })
 );
+
 if (environment == "production") {
     app.set("trust proxy", 1); // trust first proxy
     sessionSetup.cookie.secure = true; // serve secure cookies
@@ -70,6 +72,19 @@ if (environment == "production") {
 
 // Passport Setup
 app.use(passport.initialize());
+app.use(function (request, response, next) {
+    if (request.session && !request.session.regenerate) {
+        request.session.regenerate = (cb) => {
+            cb();
+        };
+    }
+    if (request.session && !request.session.save) {
+        request.session.save = (cb) => {
+            cb();
+        };
+    }
+    next();
+});
 app.use(passport.session());
 
 passport.serializeUser(function (user, done) {
